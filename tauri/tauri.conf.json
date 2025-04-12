@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../www/dist/spa",
     "devUrl": "http://localhost:9000",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeDevCommand": "cd www; DEPLOYMENT_TYPE=tauri npm run dev",
+    "beforeBuildCommand": "cd www; DEPLOYMENT_TYPE=tauri npm run build"
   },
   "app": {
     "windows": [

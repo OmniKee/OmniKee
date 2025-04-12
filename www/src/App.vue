@@ -6,10 +6,10 @@
 
 import {greet} from './omnikee'
 
-function welcome() {
-  alert(greet('world'))
+async function welcome() {
+  alert(await greet('world'))
 }
 
-welcome()
+welcome().catch(console.error)
 //
 </script>
