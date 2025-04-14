@@ -1,8 +1,7 @@
-use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-#[derive(Serialize, Default)]
+#[derive(Default)]
 pub struct AppState {
     counter: i32,
 }

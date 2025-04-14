@@ -43,7 +43,8 @@ export default defineConfig((ctx) => {
       },
 
       target: {
-        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        //browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        browser: ['esnext'],
         node: 'node20'
       },
 
