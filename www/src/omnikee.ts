@@ -1,6 +1,12 @@
-let implGreet
 
-console.log(process.env)
+interface OmniKee {
+  greet(name: string): Promise<string>;
+
+  increment(): Promise<void>;
+  decrement(): Promise<void>;
+}
+
+let handle: OmniKee
 
 if (process.env.DEPLOYMENT_TYPE === 'web') {
   console.log("OmniKee is in web mode")
@@ -8,15 +14,26 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
   const ok = await import("omnikee-wasm")
   await ok.default()
 
-  implGreet = (name: string) => Promise.resolve(ok.greet(name))
+  const state = ok.AppState.new()
+
+  handle = {
+    greet(name) {return Promise.resolve(state.greet(name))},
+    increment() {return Promise.resolve(state.increment())},
+    decrement() {return Promise.resolve(state.decrement())},
+  }
+
 
 } else {
   console.log("OmniKee is in tauri mode")
 
   const {invoke} = await import('@tauri-apps/api/core')
 
-  implGreet = async (name: string) => await invoke('greet', {name})
+  handle = {
+    async greet(name) {return await invoke('greet', {name})},
+    async increment() {return await invoke('increment')},
+    async decrement() {return await invoke('decrement')},
+  }
 
 }
 
-export const greet = implGreet
+export default handle
