@@ -3,6 +3,7 @@
 
 import {defineConfig} from '#q-app/wrappers';
 import {fileURLToPath} from 'node:url';
+import Components from 'unplugin-vue-components/vite'
 
 export default defineConfig((ctx) => {
   return {
@@ -72,7 +73,16 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        if (!viteConf.plugins) {return }
+        viteConf.plugins.push(Components({
+          dirs: ['src/components'],
+          extensions: ['vue'],
+          deep: true,
+          resolvers: [],
+          dts: true,
+        }))
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
