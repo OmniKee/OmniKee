@@ -47,6 +47,12 @@
         <window-buttons />
 
       </q-toolbar>
+
+      <q-tabs align="left" dense class="bg-secondary">
+        <q-tab v-for="db, i in databases" :key="i" :name="db">
+          <div class="tab-title">{{ db }}&nbsp;<q-btn dense flat round icon="mdi-close" size="sm" /></div>
+        </q-tab>
+      </q-tabs>
     </q-header>
 
     <q-page-container>
@@ -56,10 +62,17 @@
 </template>
 
 <script setup lang="ts">
+
+const databases = ["asd", "fgh", "jkl"]
+
 </script>
 
 <style scoped lang="scss">
 .titlebar {
   user-select: none;
+}
+
+.tab-title {
+  text-transform: none;
 }
 </style>
