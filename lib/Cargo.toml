@@ -7,6 +7,15 @@ edition = "2024"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+keepass = { version = "0.7.31", features = ["save_kdbx4", "serialization"] }
+
 serde = { version = "1.0.219", features = ["derive"] }
 wasm-bindgen = "0.2"
+
+# dependency feature overrides for keepass
+getrandom = { version = "0.3.2", features = ["wasm_js"] }
+uuid = { version = "1.16.0", features = ["rng-getrandom"] }
+anyhow = "1.0.98"
+serde-wasm-bindgen = "0.6.5"
+
 
