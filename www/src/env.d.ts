@@ -6,3 +6,7 @@ declare namespace NodeJS {
     VUE_ROUTER_BASE: string | undefined;
   }
 }
+
+/// <reference types="vite/client" />
+/// <reference types="unplugin-vue-router/client" />
+
