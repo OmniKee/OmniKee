@@ -72,7 +72,7 @@ impl Into<DatabaseOverview> for &Database {
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(not(feature = "tauri"), wasm_bindgen)]
 impl AppState {
     pub fn new() -> Self {
         Default::default()
@@ -90,7 +90,8 @@ impl AppState {
         self.counter -= 1;
     }
 
-    pub fn list_databases(&self) -> Result<JsValue, serde_wasm_bindgen::Error> {
+    #[cfg_attr(not(feature = "tauri"), wasm_bindgen(js_name = "list_databases"))]
+    pub fn list_databases_wasm(&self) -> Result<JsValue, serde_wasm_bindgen::Error> {
         serde_wasm_bindgen::to_value(
             &self
                 .databases
@@ -100,7 +101,13 @@ impl AppState {
         )
     }
 
-    pub fn load_database(
+    #[cfg(feature = "tauri")]
+    pub fn list_databases(&self) -> Vec<DatabaseOverview> {
+        self.databases.iter().map(|db| db.into()).collect()
+    }
+
+    #[cfg_attr(not(feature = "tauri"), wasm_bindgen(js_name = "load_database"))]
+    pub fn load_database_wasm(
         &mut self,
         mut data: &[u8],
         password: Option<String>,
@@ -113,5 +120,20 @@ impl AppState {
         self.databases.push(db);
 
         serde_wasm_bindgen::to_value(&res)
+    }
+
+    #[cfg(feature = "tauri")]
+    pub fn load_database(
+        &mut self,
+        mut data: &[u8],
+        password: Option<String>,
+        keyfile: Option<Vec<u8>>,
+    ) -> Result<DatabaseOverview, String> {
+        let db = Database::load(&mut data, password, keyfile).map_err(|e| format!("{}", e))?;
+
+        let res: DatabaseOverview = (&db).into();
+        self.databases.push(db);
+
+        Ok(res)
     }
 }
