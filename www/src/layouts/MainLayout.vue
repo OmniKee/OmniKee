@@ -44,6 +44,13 @@
 
         <q-space />
 
+        <q-input v-model="searchText" clearable dense filled style="max-width: 200px">
+          <template #prepend>
+            <q-icon name="mdi-magnify" />
+          </template>
+
+        </q-input>
+
         <window-buttons />
 
       </q-toolbar>
@@ -62,8 +69,12 @@
 </template>
 
 <script setup lang="ts">
+import {ref} from 'vue';
+
 
 const databases = ["asd", "fgh", "jkl"]
+
+const searchText = ref("")
 
 </script>
 
