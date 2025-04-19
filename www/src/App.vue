@@ -10,12 +10,6 @@
         </q-toolbar-title>
 
         <q-btn flat round dense>
-          <q-icon name="mdi-folder-open" />
-          <q-tooltip>Open Database</q-tooltip>
-        </q-btn>
-
-
-        <q-btn flat round dense>
           <q-icon name="mdi-content-save" />
           <q-tooltip>Save Database</q-tooltip>
         </q-btn>
@@ -48,7 +42,6 @@
           <template #prepend>
             <q-icon name="mdi-magnify" />
           </template>
-
         </q-input>
 
         <window-buttons />
@@ -56,9 +49,13 @@
       </q-toolbar>
 
       <q-tabs align="left" dense class="bg-secondary">
-        <q-tab v-for="db, i in databases" :key="i" :name="db">
-          <div class="tab-title">{{ db }}&nbsp;<q-btn dense flat round icon="mdi-close" size="sm" /></div>
-        </q-tab>
+        <q-route-tab :to="{name: '/'}" class="q-pa-none">
+          <q-icon name="mdi-folder-open" alt="Open Database" />
+          <q-tooltip>Open&nbsp;Database</q-tooltip>
+        </q-route-tab>
+
+        <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]', params: {i}}" :label="db.name"
+          no-caps />
       </q-tabs>
     </q-header>
 
@@ -69,10 +66,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
 
+import {useDatabasesStore} from '@/stores/databases'
 
-const databases = ["asd", "fgh", "jkl"]
+const databasesStore = useDatabasesStore()
+
+const databases = computed(() => {
+  return databasesStore.databases
+})
 
 const searchText = ref("")
 

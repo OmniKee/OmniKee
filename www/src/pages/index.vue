@@ -36,8 +36,12 @@
 
 <script setup lang="ts">
 import {ref} from 'vue'
+import {useRouter} from 'vue-router'
 
-import ok from '@/omnikee'
+import {useDatabasesStore} from '@/stores/databases'
+
+const databasesStore = useDatabasesStore()
+const router = useRouter()
 
 const database = ref(null)
 const password = ref("")
@@ -68,8 +72,8 @@ async function onSubmit() {
   const databaseBuffer = await readFile(database.value)
   const keyFileBuffer = keyFile.value ? await readFile(keyFile.value) : null
 
-  const db = ok.loadDatabase(databaseBuffer, password.value, keyFileBuffer)
+  await databasesStore.loadDatabase(databaseBuffer, password.value, keyFileBuffer)
 
-  console.log(db)
+  await router.push({name: '/database/[i]', params: {i: databasesStore.databases.length - 1}})
 }
 </script>
