@@ -20,6 +20,8 @@ getrandom = { version = "0.3.2", features = ["wasm_js"] }
 uuid = { version = "1.16.0", features = ["rng-getrandom"] }
 anyhow = "1.0.98"
 serde-wasm-bindgen = "0.6.5"
+console_error_panic_hook = "0.1.7"
+chrono = { version = "0.4.40", features = ["wasmbind"] }
 
 
 [target.wasm32-unknown-unknown]

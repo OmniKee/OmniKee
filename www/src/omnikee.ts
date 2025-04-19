@@ -10,7 +10,7 @@ export interface OmniKee {
   decrement(): Promise<void>;
 
   listDatabases(): Promise<DatabaseOverview[]>;
-  loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array): Promise<DatabaseOverview>;
+  loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>;
 }
 
 let handle: OmniKee

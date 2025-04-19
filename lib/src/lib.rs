@@ -34,7 +34,7 @@ impl Database {
             key = key.with_keyfile(&mut &kf[..]).context("Reading keyfile")?;
         }
 
-        let database = keepass::Database::open(data, key.clone()).context("Opening database")?;
+        let database = keepass::Database::open(data, key.clone())?;
 
         Ok(Self { database, key })
     }
@@ -75,6 +75,11 @@ impl Into<DatabaseOverview> for &Database {
 #[cfg_attr(not(feature = "tauri"), wasm_bindgen)]
 impl AppState {
     pub fn new() -> Self {
+        #[cfg(not(feature = "tauri"))]
+        {
+            console_error_panic_hook::set_once()
+        }
+
         Default::default()
     }
 
@@ -114,7 +119,7 @@ impl AppState {
         keyfile: Option<Vec<u8>>,
     ) -> std::result::Result<JsValue, serde_wasm_bindgen::Error> {
         let db = Database::load(&mut data, password, keyfile)
-            .map_err(|e| JsValue::from_str(&e.to_string()))?;
+            .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
 
         let res: DatabaseOverview = (&db).into();
         self.databases.push(db);

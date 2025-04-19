@@ -33,12 +33,12 @@ fn list_databases(state: State<'_>) -> Vec<DatabaseOverview> {
 #[tauri::command]
 fn load_database(
     state: State<'_>,
-    data: &[u8],
+    data: Vec<u8>,
     password: Option<String>,
     keyfile: Option<Vec<u8>>,
 ) -> Result<DatabaseOverview, String> {
     let mut state = state.lock().unwrap();
-    state.load_database(data, password, keyfile)
+    state.load_database(&data[..], password, keyfile)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
