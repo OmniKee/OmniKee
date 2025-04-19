@@ -1,6 +1,15 @@
 
+export type Folder = {
+  name: string,
+  uuid: string,
+
+  children: Folder[],
+}
+
 export type DatabaseOverview = {
   name: string,
+
+  root: Folder,
 }
 
 export interface OmniKee {

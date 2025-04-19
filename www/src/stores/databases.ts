@@ -17,6 +17,8 @@ export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */)
   async function loadDatabase(data: Uint8Array, password: string | null, keyFile: Uint8Array | null) {
     const res = await ok.loadDatabase(data, password, keyFile)
     databases.value.push(res)
+
+    console.log(res)
     return res
   }
 
