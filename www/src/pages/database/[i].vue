@@ -2,12 +2,17 @@
   <q-page class="row">
     <q-splitter v-model="splitter" class="col-grow">
       <template #before>
-        <q-tree v-model:selected="selectedNode" :nodes="nodes" node-key="uuid" selected-color="secondary"
-          default-expand-all></q-tree>
+        <q-scroll-area style="height: 100%; max-width: 100%;">
+          <q-tree v-model:selected="selectedNode" :nodes="nodes" node-key="uuid" selected-color="secondary"
+            default-expand-all></q-tree>
+        </q-scroll-area>
 
       </template>
       <template #after>
-        {{ selectedNode }}
+        <!--<q-scroll-area style="height: 100%; max-width: 100%;">-->
+        <q-table class="entries" v-if="entries" :rows="entries" :columns="columns" row-key="uuid"
+          :rows-per-page-options="[0]" hide-pagination />
+        <!--</q-scroll-area>-->
       </template>
 
     </q-splitter>
@@ -17,9 +22,12 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {useRoute} from 'vue-router'
+import {asyncComputed} from '@vueuse/core'
+import {type QTableColumn} from 'quasar'
 
 import {useDatabasesStore} from '@/stores/databases'
-import {type Group} from 'omnikee-wasm'
+import {type Entry, type Group} from 'omnikee-wasm'
+import ok from '@/omnikee'
 
 
 const route = useRoute('/database/[i]')
@@ -28,7 +36,7 @@ const databasesStore = useDatabasesStore()
 
 const database = computed(() => databasesStore.databases[+route.params.i])
 
-const splitter = ref(30)
+const splitter = ref(20)
 
 const selectedNode = ref<string | null>(null)
 
@@ -51,6 +59,20 @@ const nodes = computed(() => {
   }
   return [translate(database.value.root)]
 })
+
+
+const columns: QTableColumn[] = [
+  {name: "name", label: "Name", field: "name", align: "left", sortable: true},
+  {name: "user_name", label: "Username", field: "user_name", align: "left", sortable: true},
+  {name: "url", label: "URL", field: "url", align: "left", sortable: true}
+]
+
+const entries = asyncComputed(async () => {
+  if (!selectedNode.value) {return []}
+  const res: Entry[] = await ok.listEntries(+route.params.i, selectedNode.value)
+
+  return res
+}, undefined)
 
 
 </script>

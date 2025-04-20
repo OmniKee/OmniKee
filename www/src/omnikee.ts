@@ -1,5 +1,5 @@
 
-import {type DatabaseOverview} from 'omnikee-wasm'
+import {type DatabaseOverview, type Entry} from 'omnikee-wasm'
 
 
 export interface OmniKee {
@@ -10,6 +10,8 @@ export interface OmniKee {
 
   listDatabases(): Promise<DatabaseOverview[]>;
   loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>;
+
+  listEntries(dbIdx: number, groupUuid: string): Promise<Entry[]>,
 }
 
 let handle: OmniKee
@@ -29,6 +31,8 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
 
     listDatabases() {return Promise.resolve(state.list_databases())},
     loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database(data, password, keyfile))},
+
+    listEntries(dbIdx, groupUuid) {return Promise.resolve(state.list_entries(dbIdx, groupUuid))},
   }
 
 } else {
@@ -43,6 +47,8 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
 
     async listDatabases() {return await invoke('list_databases')},
     async loadDatabase(data, password, keyfile) {return await invoke('load_database', {data, password, keyfile})},
+
+    async listEntries(database_idx, group_uuid) {return await invoke('list_entries', {database_idx, group_uuid})},
   }
 
 }
