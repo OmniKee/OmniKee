@@ -19,7 +19,7 @@ import {computed, ref} from 'vue'
 import {useRoute} from 'vue-router'
 
 import {useDatabasesStore} from '@/stores/databases'
-import {type Folder} from '@/omnikee'
+import {type Group} from 'omnikee-wasm'
 
 
 const route = useRoute('/database/[i]')
@@ -42,7 +42,7 @@ type TreeNode = {
 const nodes = computed(() => {
   if (!database.value) {return []}
 
-  function translate(node: Folder): TreeNode {
+  function translate(node: Group): TreeNode {
     return {
       label: node.name,
       uuid: node.uuid,
@@ -51,5 +51,6 @@ const nodes = computed(() => {
   }
   return [translate(database.value.root)]
 })
+
 
 </script>

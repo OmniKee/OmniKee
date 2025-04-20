@@ -1,16 +1,6 @@
 
-export type Folder = {
-  name: string,
-  uuid: string,
+import {type DatabaseOverview} from 'omnikee-wasm'
 
-  children: Folder[],
-}
-
-export type DatabaseOverview = {
-  name: string,
-
-  root: Folder,
-}
 
 export interface OmniKee {
   greet(name: string): Promise<string>;

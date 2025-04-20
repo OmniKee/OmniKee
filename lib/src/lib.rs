@@ -3,7 +3,7 @@ use std::str::FromStr;
 use anyhow::{Context, Result};
 use keepass::{
     DatabaseKey,
-    db::{Group, Node, NodeRef},
+    db::{Group as KpGroup, Node, NodeRef},
 };
 use serde::{Deserialize, Serialize};
 
@@ -71,15 +71,15 @@ impl Database {
 pub struct DatabaseOverview {
     pub name: String,
 
-    pub root: Folder,
+    pub root: Group,
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct Folder {
+pub struct Group {
     pub name: String,
     pub uuid: Uuid,
-    pub children: Vec<Folder>,
+    pub children: Vec<Group>,
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
@@ -100,9 +100,9 @@ impl Into<DatabaseOverview> for &Database {
     }
 }
 
-impl Into<Folder> for &Group {
-    fn into(self) -> Folder {
-        let children: Vec<Folder> = self
+impl Into<Group> for &KpGroup {
+    fn into(self) -> Group {
+        let children: Vec<Group> = self
             .children
             .iter()
             .filter_map(|node| match node {
@@ -111,7 +111,7 @@ impl Into<Folder> for &Group {
             })
             .collect();
 
-        Folder {
+        Group {
             name: self.name.to_string(),
             uuid: self.uuid.clone(),
             children,

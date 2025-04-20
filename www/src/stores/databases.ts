@@ -1,7 +1,9 @@
 import {defineStore} from 'pinia'
 import {ref} from "vue"
 
-import ok, {type DatabaseOverview} from '@/omnikee'
+import {type DatabaseOverview} from 'omnikee-wasm'
+
+import ok from '@/omnikee'
 
 
 
