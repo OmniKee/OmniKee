@@ -10,7 +10,7 @@ tauri = []
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-keepass = { version = "0.7.31", features = ["save_kdbx4", "serialization"] }
+keepass = { version = "0.7.32", features = ["save_kdbx4", "serialization"] }
 
 serde = { version = "1.0.219", features = ["derive"] }
 wasm-bindgen = "0.2"
