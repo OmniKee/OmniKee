@@ -3,16 +3,34 @@
     <q-splitter v-model="splitter" class="col-grow">
       <template #before>
         <q-scroll-area style="height: 100%; max-width: 100%;">
-          <q-tree v-model:selected="selectedNode" :nodes="nodes" node-key="uuid" selected-color="secondary"
-            default-expand-all></q-tree>
+          <q-tree v-model:selected="selectedNode" :nodes="nodes" node-key="uuid" selected-color="accent"
+            default-expand-all dense>
+            <template #default-header="{node}">
+              <q-avatar size="lg" v-if="node.avatar" :icon="node.avatar" />
+
+              {{ node.label }}
+
+            </template>
+
+          </q-tree>
         </q-scroll-area>
 
       </template>
       <template #after>
-        <!--<q-scroll-area style="height: 100%; max-width: 100%;">-->
-        <q-table class="entries" v-if="entries" :rows="entries" :columns="columns" row-key="uuid"
-          :rows-per-page-options="[0]" hide-pagination />
-        <!--</q-scroll-area>-->
+        <q-scroll-area style="height: 100%; max-width: 100%;">
+          <q-table class="entries" v-if="entries" :rows="entries" :columns="columns" row-key="uuid"
+            :rows-per-page-options="[0]" hide-pagination>
+
+            <template #body-cell-name="{row}">
+              <q-td>
+                <q-avatar size="lg" v-if="row.icon"
+                  :icon="row.icon.startsWith('mdi-') ? row.icon : `img:${row.icon}`" />
+                {{ row.name }}
+              </q-td>
+            </template>
+
+          </q-table>
+        </q-scroll-area>
       </template>
 
     </q-splitter>
@@ -23,7 +41,7 @@
 import {computed, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {asyncComputed} from '@vueuse/core'
-import {type QTableColumn} from 'quasar'
+import {type QTableColumn, type QTreeNode} from 'quasar'
 
 import {useDatabasesStore} from '@/stores/databases'
 import {type Entry, type Group} from 'omnikee-wasm'
@@ -41,21 +59,24 @@ const splitter = ref(20)
 const selectedNode = ref<string | null>(null)
 
 
-type TreeNode = {
-  label: string,
-  uuid: string,
-  children: TreeNode[],
-}
-
 const nodes = computed(() => {
   if (!database.value) {return []}
 
-  function translate(node: Group): TreeNode {
-    return {
+  function translate(node: Group): QTreeNode {
+
+    const out: QTreeNode = {
       label: node.name,
       uuid: node.uuid,
       children: node.children.map(translate)
     }
+
+    if (node.icon && node.icon.startsWith("mdi-")) {
+      out.avatar = node.icon
+    } else if (node.icon) {
+      out.avatar = `img:${node.icon}`
+    }
+
+    return out
   }
   return [translate(database.value.root)]
 })

@@ -23,6 +23,7 @@ serde-wasm-bindgen = "0.6.5"
 console_error_panic_hook = "0.1.7"
 chrono = { version = "0.4.40", features = ["wasmbind"] }
 tsify = { version = "0.5.5", features = ["js"] }
+base64 = "0.22.1"
 
 
 [target.wasm32-unknown-unknown]

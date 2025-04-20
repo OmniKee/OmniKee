@@ -1,9 +1,11 @@
-use std::str::FromStr;
+mod icon;
+
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::{Context, Result};
 use keepass::{
     DatabaseKey,
-    db::{Group as KpGroup, Node, NodeRef},
+    db::{Database as KpDatabase, Group as KpGroup, Node, NodeRef, Value as KpValue},
 };
 use serde::{Deserialize, Serialize};
 
@@ -80,6 +82,7 @@ pub struct Group {
     pub name: String,
     pub uuid: Uuid,
     pub children: Vec<Group>,
+    pub icon: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Tsify)]
@@ -89,32 +92,58 @@ pub struct Entry {
     pub uuid: Uuid,
     pub user_name: Option<String>,
     pub url: Option<String>,
+
+    pub fields: HashMap<String, Value>,
+
+    pub icon: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub enum Value {
+    Bytes(Vec<u8>),
+    Unprotected(String),
+    Protected,
 }
 
 impl Into<DatabaseOverview> for &Database {
     fn into(self) -> DatabaseOverview {
         DatabaseOverview {
             name: self.get_name().to_string(),
-            root: (&self.database.root).into(),
+            root: (&self.database.root, &self.database).into(),
         }
     }
 }
 
-impl Into<Group> for &KpGroup {
+impl Into<Group> for (&KpGroup, &KpDatabase) {
     fn into(self) -> Group {
         let children: Vec<Group> = self
+            .0
             .children
             .iter()
             .filter_map(|node| match node {
-                keepass::db::Node::Group(group) => Some(group.into()),
+                keepass::db::Node::Group(group) => Some((group, self.1).into()),
                 keepass::db::Node::Entry(..) => None,
             })
             .collect();
 
+        let icon = icon::get_icon(&self.1, self.0.custom_icon_uuid.as_ref(), self.0.icon_id);
+
         Group {
-            name: self.name.to_string(),
-            uuid: self.uuid.clone(),
+            name: self.0.name.to_string(),
+            uuid: self.0.uuid.clone(),
             children,
+            icon,
+        }
+    }
+}
+
+impl Into<Value> for &KpValue {
+    fn into(self) -> Value {
+        match self {
+            KpValue::Bytes(items) => Value::Bytes(items.to_owned()),
+            KpValue::Unprotected(s) => Value::Unprotected(s.to_owned()),
+            KpValue::Protected(..) => Value::Protected,
         }
     }
 }
@@ -193,11 +222,25 @@ impl AppState {
                     let user_name = entry.get_username().map(String::from);
                     let url = entry.get_url().map(String::from);
 
+                    let fields = entry
+                        .fields
+                        .iter()
+                        .map(|(k, v)| (k.to_string(), v.into()))
+                        .collect();
+
+                    let icon = icon::get_icon(
+                        &db.database,
+                        entry.custom_icon_uuid.as_ref(),
+                        entry.icon_id,
+                    );
+
                     Some(Entry {
                         name,
                         uuid,
                         user_name,
                         url,
+                        fields,
+                        icon,
                     })
                 }
                 Node::Group(..) => None,
