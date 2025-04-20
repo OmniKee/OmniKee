@@ -1,7 +1,14 @@
+use std::str::FromStr;
+
 use anyhow::{Context, Result};
-use keepass::DatabaseKey;
+use keepass::{
+    DatabaseKey,
+    db::{Group, Node, NodeRef},
+};
 use serde::{Deserialize, Serialize};
 
+use tsify::Tsify;
+use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -59,15 +66,55 @@ impl Database {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct DatabaseOverview {
     pub name: String,
+
+    pub root: Folder,
+}
+
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct Folder {
+    pub name: String,
+    pub uuid: Uuid,
+    pub children: Vec<Folder>,
+}
+
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct Entry {
+    pub name: Option<String>,
+    pub uuid: Uuid,
+    pub user_name: Option<String>,
+    pub url: Option<String>,
 }
 
 impl Into<DatabaseOverview> for &Database {
     fn into(self) -> DatabaseOverview {
         DatabaseOverview {
             name: self.get_name().to_string(),
+            root: (&self.database.root).into(),
+        }
+    }
+}
+
+impl Into<Folder> for &Group {
+    fn into(self) -> Folder {
+        let children: Vec<Folder> = self
+            .children
+            .iter()
+            .filter_map(|node| match node {
+                keepass::db::Node::Group(group) => Some(group.into()),
+                keepass::db::Node::Entry(..) => None,
+            })
+            .collect();
+
+        Folder {
+            name: self.name.to_string(),
+            uuid: self.uuid.clone(),
+            children,
         }
     }
 }
@@ -95,39 +142,12 @@ impl AppState {
         self.counter -= 1;
     }
 
-    #[cfg_attr(not(feature = "tauri"), wasm_bindgen(js_name = "list_databases"))]
-    pub fn list_databases_wasm(&self) -> Result<JsValue, serde_wasm_bindgen::Error> {
-        serde_wasm_bindgen::to_value(
-            &self
-                .databases
-                .iter()
-                .map(|db| db.into())
-                .collect::<Vec<DatabaseOverview>>(),
-        )
-    }
-
-    #[cfg(feature = "tauri")]
+    /// List databases that are currently loaded in the AppState
     pub fn list_databases(&self) -> Vec<DatabaseOverview> {
         self.databases.iter().map(|db| db.into()).collect()
     }
 
-    #[cfg_attr(not(feature = "tauri"), wasm_bindgen(js_name = "load_database"))]
-    pub fn load_database_wasm(
-        &mut self,
-        mut data: &[u8],
-        password: Option<String>,
-        keyfile: Option<Vec<u8>>,
-    ) -> std::result::Result<JsValue, serde_wasm_bindgen::Error> {
-        let db = Database::load(&mut data, password, keyfile)
-            .map_err(|e| JsValue::from_str(&format!("{}", e)))?;
-
-        let res: DatabaseOverview = (&db).into();
-        self.databases.push(db);
-
-        serde_wasm_bindgen::to_value(&res)
-    }
-
-    #[cfg(feature = "tauri")]
+    /// Load a new database from a buffer
     pub fn load_database(
         &mut self,
         mut data: &[u8],
@@ -140,5 +160,48 @@ impl AppState {
         self.databases.push(db);
 
         Ok(res)
+    }
+
+    /// List the entries directly contained within a group of a database
+    pub fn list_entries(&self, database_idx: usize, group_uuid: String) -> Vec<Entry> {
+        let Ok(group_uuid) = Uuid::from_str(&group_uuid) else {
+            return Vec::new();
+        };
+
+        let Some(db) = self.databases.get(database_idx) else {
+            return Vec::new();
+        };
+
+        // find the appropriate containing group recursively
+        let Some(NodeRef::Group(group)) = db.database.root.iter().find(|node| {
+            if let NodeRef::Group(g) = node {
+                g.uuid == group_uuid
+            } else {
+                false
+            }
+        }) else {
+            return Vec::new();
+        };
+
+        group
+            .children
+            .iter()
+            .filter_map(|node| match node {
+                Node::Entry(entry) => {
+                    let name = entry.get_title().map(String::from);
+                    let uuid = entry.uuid.clone();
+                    let user_name = entry.get_username().map(String::from);
+                    let url = entry.get_url().map(String::from);
+
+                    Some(Entry {
+                        name,
+                        uuid,
+                        user_name,
+                        url,
+                    })
+                }
+                Node::Group(..) => None,
+            })
+            .collect()
     }
 }
