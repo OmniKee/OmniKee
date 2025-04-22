@@ -24,7 +24,6 @@ pub struct AppState {
 #[derive(Clone)]
 struct Database {
     database: keepass::Database,
-    key: keepass::DatabaseKey,
 }
 
 impl Database {
@@ -45,17 +44,7 @@ impl Database {
 
         let database = keepass::Database::open(data, key.clone())?;
 
-        Ok(Self { database, key })
-    }
-
-    fn save(&self) -> Result<Vec<u8>> {
-        let mut buffer = Vec::new();
-
-        self.database
-            .save(&mut buffer, self.key.clone())
-            .context("Writing database")?;
-
-        Ok(buffer)
+        Ok(Self { database })
     }
 
     fn get_name(&self) -> &str {
