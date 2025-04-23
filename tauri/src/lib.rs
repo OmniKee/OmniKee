@@ -1,32 +1,13 @@
 use std::sync::Mutex;
 
-use omnikee_lib::{AppState, DatabaseOverview};
+use omnikee_lib::{AppState, DatabaseOverview, Entry};
 use tauri::Manager;
 
 type State<'a> = tauri::State<'a, Mutex<AppState>>;
 
 #[tauri::command]
-fn greet(name: &str, state: State<'_>) -> String {
-    let state = state.lock().unwrap();
-    state.greet(name)
-}
-
-#[tauri::command]
-fn increment(state: State<'_>) {
-    let mut state = state.lock().unwrap();
-    state.increment();
-}
-
-#[tauri::command]
-fn decrement(state: State<'_>) {
-    let mut state = state.lock().unwrap();
-    state.decrement();
-}
-
-#[tauri::command]
 fn list_databases(state: State<'_>) -> Vec<DatabaseOverview> {
     let state = state.lock().unwrap();
-
     state.list_databases()
 }
 
@@ -47,9 +28,6 @@ pub fn run() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            greet,
-            increment,
-            decrement,
             list_databases,
             load_database,
         ])

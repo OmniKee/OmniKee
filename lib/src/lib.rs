@@ -16,8 +16,6 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Default)]
 pub struct AppState {
-    counter: i32,
-
     databases: Vec<Database>,
 }
 
@@ -146,18 +144,6 @@ impl AppState {
         }
 
         Default::default()
-    }
-
-    pub fn greet(&self, name: &str) -> String {
-        format!("Hello, {}! the counter is {}", name, self.counter)
-    }
-
-    pub fn increment(&mut self) {
-        self.counter += 1;
-    }
-
-    pub fn decrement(&mut self) {
-        self.counter -= 1;
     }
 
     /// List databases that are currently loaded in the AppState
