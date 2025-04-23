@@ -23,7 +23,7 @@
             hide-pagination>
 
             <template #body-cell-name="{row}">
-              <q-td>
+              <q-td @dblclick="onDoubleClick(row)">
                 <q-avatar size="lg" v-if="row.icon"
                   :icon="row.icon.startsWith('mdi-') ? row.icon : `img:${row.icon}`" />
                 {{ row.name }}
@@ -45,7 +45,7 @@ import {type QTableColumn, type QTreeNode} from 'quasar'
 
 import {useViewStore} from '@/stores/view'
 
-import {type Group} from 'omnikee-wasm'
+import {type Entry, type Group} from 'omnikee-wasm'
 
 const route = useRoute('/database/[i]')
 
@@ -92,5 +92,9 @@ const columns: QTableColumn[] = [
   {name: "user_name", label: "Username", field: "user_name", align: "left", sortable: true},
   {name: "url", label: "URL", field: "url", align: "left", sortable: true}
 ]
+
+function onDoubleClick(entry: Entry) {
+  console.log(entry)
+}
 
 </script>

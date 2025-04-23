@@ -6,7 +6,7 @@ export interface OmniKee {
   listDatabases(): Promise<DatabaseOverview[]>;
   loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>;
 
-  listEntries(dbIdx: number, groupUuid: string): Promise<Entry[]>,
+  listEntries(database_idx: number, group_uuid: string): Promise<Entry[]>,
 }
 
 let handle: OmniKee
@@ -23,7 +23,7 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
     listDatabases() {return Promise.resolve(state.list_databases())},
     loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database(data, password, keyfile))},
 
-    listEntries(dbIdx, groupUuid) {return Promise.resolve(state.list_entries(dbIdx, groupUuid))},
+    listEntries(database_idx, group_uuid) {return Promise.resolve(state.list_entries(database_idx, group_uuid))},
   }
 
 } else {
@@ -35,7 +35,7 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
     async listDatabases() {return await invoke('list_databases')},
     async loadDatabase(data, password, keyfile) {return await invoke('load_database', {data, password, keyfile})},
 
-    async listEntries(database_idx, group_uuid) {return await invoke('list_entries', {database_idx, group_uuid})},
+    async listEntries(databaseIdx, groupUuid) {return await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})},
   }
 
 }

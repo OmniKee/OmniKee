@@ -10,7 +10,6 @@ import ok from '@/omnikee'
 export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */) => {
   const databases = ref<DatabaseOverview[]>([])
 
-
   async function refresh() {
     const res = await ok.listDatabases()
     databases.value = res
@@ -20,7 +19,6 @@ export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */)
     const res = await ok.loadDatabase(data, password, keyFile)
     databases.value.push(res)
 
-    console.log(res)
     return res
   }
 

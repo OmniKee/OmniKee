@@ -22,6 +22,12 @@ fn load_database(
     state.load_database(&data[..], password, keyfile)
 }
 
+#[tauri::command]
+fn list_entries(state: State<'_>, database_idx: usize, group_uuid: String) -> Vec<Entry> {
+    let state = state.lock().unwrap();
+    state.list_entries(database_idx, group_uuid)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state: AppState = Default::default();
@@ -30,6 +36,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_databases,
             load_database,
+            list_entries,
         ])
         .setup(|app| {
             app.manage(Mutex::new(state));
