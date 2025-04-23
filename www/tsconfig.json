@@ -3,7 +3,8 @@
   "compilerOptions": {
     "moduleResolution": "bundler",
     "types": [
-      "unplugin-vue-router/client"
+      "unplugin-vue-router/client",
+      "vite-plugin-arraybuffer/types"
     ]
   }
 }

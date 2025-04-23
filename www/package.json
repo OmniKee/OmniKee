@@ -47,6 +47,7 @@
     "unplugin-vue-components": "^28.5.0",
     "unplugin-vue-layouts": "^0.0.1",
     "unplugin-vue-router": "^0.12.0",
+    "vite-plugin-arraybuffer": "^0.1.0",
     "vite-plugin-checker": "^0.9.0",
     "vite-plugin-vue-devtools": "^7.7.5",
     "vue-tsc": "^2.0.29"

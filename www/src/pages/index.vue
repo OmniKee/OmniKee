@@ -26,6 +26,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
+          <q-btn @click="onLoadExample">Load Example</q-btn>
           <q-btn color="primary" type="submit">Open</q-btn>
           <q-btn>Reset</q-btn>
         </q-card-actions>
@@ -35,6 +36,9 @@
 </template>
 
 <script setup lang="ts">
+
+import demoDB from '@/assets/demo.kdbx?uint8array'
+
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 
@@ -75,5 +79,11 @@ async function onSubmit() {
   await databasesStore.loadDatabase(databaseBuffer, password.value, keyFileBuffer)
 
   await router.push({name: '/database/[i]', params: {i: databasesStore.databases.length - 1}})
+}
+
+async function onLoadExample() {
+  await databasesStore.loadDatabase(demoDB, "demopass", null)
+  await router.push({name: '/database/[i]', params: {i: databasesStore.databases.length - 1}})
+
 }
 </script>

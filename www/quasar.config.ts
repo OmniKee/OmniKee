@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import Components from 'unplugin-vue-components/vite'
 import Router from 'unplugin-vue-router/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import arraybuffer from "vite-plugin-arraybuffer"
 
 export default defineConfig((ctx) => {
   return {
@@ -89,6 +90,8 @@ export default defineConfig((ctx) => {
         }))
 
         viteConf.plugins.push(vueDevTools())
+
+        viteConf.plugins.push(arraybuffer())
       },
       // viteVuePluginOptions: {},
 
