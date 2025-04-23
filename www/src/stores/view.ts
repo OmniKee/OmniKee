@@ -44,9 +44,15 @@ export const useViewStore = defineStore('view', () => {
   }, undefined, loadingGroupEntries)
 
 
+  const entry = computed<Entry | undefined>(() => {
+    if (typeof current.value.database === 'undefined' || !current.value.entry || !groupEntries.value) {return undefined}
+    return groupEntries.value.find(e => e.uuid === current.value.entry)
+  })
+
   return {
     current,
     database,
     groupEntries, loadingGroupEntries,
+    entry
   }
 })

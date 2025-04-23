@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated data-tauri-drag-region>
+    <q-header data-tauri-drag-region>
       <q-toolbar class="titlebar" data-tauri-drag-region>
         <q-avatar data-tauri-drag-region="">
           <img src="@/assets/logo.svg" alt="OmniKee logo" />
@@ -48,13 +48,13 @@
 
       </q-toolbar>
 
-      <q-tabs align="left" dense class="bg-secondary">
-        <q-route-tab :to="{name: '/'}" class="q-pa-none">
+      <q-tabs align="left" class="bg-secondary">
+        <q-route-tab :to="{name: '/'}">
           <q-icon name="mdi-folder-open" alt="Open Database" />
           <q-tooltip>Open&nbsp;Database</q-tooltip>
         </q-route-tab>
 
-        <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]', params: {i}}" :label="db.name"
+        <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]/', params: {i}}" :label="db.name"
           no-caps />
       </q-tabs>
     </q-header>

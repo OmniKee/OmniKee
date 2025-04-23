@@ -78,12 +78,12 @@ async function onSubmit() {
 
   await databasesStore.loadDatabase(databaseBuffer, password.value, keyFileBuffer)
 
-  await router.push({name: '/database/[i]', params: {i: databasesStore.databases.length - 1}})
+  await router.push({name: '/database/[i]/', params: {i: databasesStore.databases.length - 1}})
 }
 
 async function onLoadExample() {
   await databasesStore.loadDatabase(demoDB, "demopass", null)
-  await router.push({name: '/database/[i]', params: {i: databasesStore.databases.length - 1}})
+  await router.push({name: '/database/[i]/', params: {i: databasesStore.databases.length - 1}})
 
 }
 </script>
