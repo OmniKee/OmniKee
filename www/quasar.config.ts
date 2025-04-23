@@ -5,6 +5,7 @@ import {defineConfig} from '#q-app/wrappers';
 import {fileURLToPath} from 'node:url';
 import Components from 'unplugin-vue-components/vite'
 import Router from 'unplugin-vue-router/vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig((ctx) => {
   return {
@@ -86,6 +87,8 @@ export default defineConfig((ctx) => {
           resolvers: [],
           dts: true,
         }))
+
+        viteConf.plugins.push(vueDevTools())
       },
       // viteVuePluginOptions: {},
 
