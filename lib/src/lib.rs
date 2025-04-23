@@ -236,4 +236,37 @@ impl AppState {
             })
             .collect()
     }
+
+    /// Reveal a protected value within an entry, e.g. a password
+    pub fn reveal_protected(
+        &self,
+        database_idx: usize,
+        entry_uuid: &str,
+        field_name: &str,
+    ) -> Option<String> {
+        let Ok(entry_uuid) = Uuid::from_str(&entry_uuid) else {
+            return None;
+        };
+
+        let db = self.databases.get(database_idx)?;
+
+        // find the appropriate containing group recursively
+        let Some(NodeRef::Entry(entry)) = db.database.root.iter().find(|node| {
+            if let NodeRef::Entry(e) = node {
+                e.uuid == entry_uuid
+            } else {
+                false
+            }
+        }) else {
+            return None;
+        };
+
+        let value = entry.fields.get(field_name)?;
+
+        if let KpValue::Protected(v) = value {
+            String::from_utf8(v.unsecure().to_vec()).ok()
+        } else {
+            None
+        }
+    }
 }
