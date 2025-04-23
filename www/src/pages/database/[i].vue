@@ -3,7 +3,7 @@
     <q-splitter v-model="splitter" class="col-grow">
       <template #before>
         <q-scroll-area style="height: 100%; max-width: 100%;">
-          <q-tree v-model:selected="selectedNode" :nodes="nodes" node-key="uuid" selected-color="accent"
+          <q-tree v-model:selected="selectedGroup" :nodes="nodes" node-key="uuid" selected-color="accent"
             default-expand-all dense>
             <template #default-header="{node}">
               <q-avatar size="lg" v-if="node.avatar" :icon="node.avatar" />
@@ -18,8 +18,9 @@
       </template>
       <template #after>
         <q-scroll-area style="height: 100%; max-width: 100%;">
-          <q-table class="entries" v-if="entries" :rows="entries" :columns="columns" row-key="uuid"
-            :rows-per-page-options="[0]" hide-pagination>
+          <q-table class="entries" v-if="viewStore.groupEntries" :rows="viewStore.groupEntries"
+            :loading="viewStore.loadingGroupEntries" :columns="columns" row-key="uuid" :rows-per-page-options="[0]"
+            hide-pagination>
 
             <template #body-cell-name="{row}">
               <q-td>
@@ -40,27 +41,22 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import {asyncComputed} from '@vueuse/core'
 import {type QTableColumn, type QTreeNode} from 'quasar'
 
-import {useDatabasesStore} from '@/stores/databases'
-import {type Entry, type Group} from 'omnikee-wasm'
-import ok from '@/omnikee'
+import {useViewStore} from '@/stores/view'
 
+import {type Group} from 'omnikee-wasm'
 
 const route = useRoute('/database/[i]')
 
-const databasesStore = useDatabasesStore()
+const viewStore = useViewStore()
 
-const database = computed(() => databasesStore.databases[+route.params.i])
+viewStore.current.database = +route.params.i
 
 const splitter = ref(20)
 
-const selectedNode = ref<string | null>(null)
-
-
 const nodes = computed(() => {
-  if (!database.value) {return []}
+  if (!viewStore.database) {return []}
 
   function translate(node: Group): QTreeNode {
 
@@ -78,7 +74,16 @@ const nodes = computed(() => {
 
     return out
   }
-  return [translate(database.value.root)]
+  return [translate(viewStore.database.root)]
+})
+
+const selectedGroup = computed({
+  get() {
+    return viewStore.current.group
+  },
+  set(v) {
+    viewStore.current.group = v
+  }
 })
 
 
@@ -87,13 +92,5 @@ const columns: QTableColumn[] = [
   {name: "user_name", label: "Username", field: "user_name", align: "left", sortable: true},
   {name: "url", label: "URL", field: "url", align: "left", sortable: true}
 ]
-
-const entries = asyncComputed(async () => {
-  if (!selectedNode.value) {return []}
-  const res: Entry[] = await ok.listEntries(+route.params.i, selectedNode.value)
-
-  return res
-}, undefined)
-
 
 </script>
