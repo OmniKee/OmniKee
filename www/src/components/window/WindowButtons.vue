@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import {getCurrentWindow} from '@tauri-apps/api/window'
 
-const isTauri = process.env.DEPLOYMENT_TYPE === 'tauri'
+const isTauri = process.env.TAURI_ENV_PLATFORM !== 'web'
 
 async function onMinimize() {
   const win = getCurrentWindow()

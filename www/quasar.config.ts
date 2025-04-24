@@ -68,7 +68,7 @@ export default defineConfig((ctx) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        DEPLOYMENT_TYPE: process.env.DEPLOYMENT_TYPE || 'web',
+        TAURI_ENV_PLATFORM: process.env.TAURI_ENV_PLATFORM || 'web',
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

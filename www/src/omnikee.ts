@@ -11,8 +11,10 @@ export interface OmniKee {
 
 let handle: OmniKee
 
-if (process.env.DEPLOYMENT_TYPE === 'web') {
-  console.log("OmniKee is in web mode")
+console.log(`OmniKee platform: ${process.env.TAURI_ENV_PLATFORM}`)
+
+if (process.env.TAURI_ENV_PLATFORM === 'web') {
+  console.log("OmniKee will use baked-in WebAssembly module")
 
   const ok = await import("omnikee-wasm")
   await ok.default()
@@ -27,7 +29,7 @@ if (process.env.DEPLOYMENT_TYPE === 'web') {
   }
 
 } else {
-  console.log("OmniKee is in tauri mode")
+  console.log("OmniKee will dispatch commands to Tauri backend")
 
   const {invoke} = await import('@tauri-apps/api/core')
 
