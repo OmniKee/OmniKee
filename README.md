@@ -1,7 +1,7 @@
 # ![Logo](www/src/assets/logo.svg) OmniKee
 A cross-platform<sup>1</sup>, KeePass-compatible password manager that runs on Linux, Windows, and your web browser. Written in memory-safe Rust and TypeScript code. Powered by [Tauri](https://v2.tauri.app/), [wasm-pack](https://github.com/rustwasm/wasm-pack), [Quasar](https://quasar.dev/), [Vite](https://vite.dev/), and [Vue](https://vuejs.org/).
 
-[Try in your Browser](https://omnikee.github.io/OmniKee) | [Releases](releases/latest) | [Docs](https://omnikee.github.io)
+[Try in your Browser](https://omnikee.github.io/OmniKee) | [Download](https://github.com/OmniKee/OmniKee/releases/latest) | [Docs](https://omnikee.github.io)
 
 <sup>1</sup> MacOS, iOS, Android could be supported in principle, but currently aren't - contributors wanted!
 
