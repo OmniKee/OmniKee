@@ -50,6 +50,8 @@ jobs:
 
       - name: build SPA
         working-directory: ./www
+        env:
+          PUBLIC_PATH: '/OmniKee'
         run: npm run build
 
       - name: Upload static files as artifact

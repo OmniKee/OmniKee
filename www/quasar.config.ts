@@ -65,7 +65,7 @@ export default defineConfig((ctx) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath: process.env.PUBLIC_PATH || '/',
       // analyze: true,
       env: {
         TAURI_ENV_PLATFORM: process.env.TAURI_ENV_PLATFORM || 'web',
