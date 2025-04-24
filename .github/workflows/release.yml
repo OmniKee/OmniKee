@@ -37,6 +37,12 @@ jobs:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
+
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
@@ -48,6 +54,12 @@ jobs:
       - name: install frontend dependencies
         working-directory: ./www
         run: npm install # change this to npm, pnpm or bun depending on which one you use.
+
+      - name: bundle WebAssembly library (for types)
+        working-directory: ./lib
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
+        run: wasm-pack build -t web
 
       - uses: tauri-apps/tauri-action@v0
         env:
