@@ -1,6 +1,6 @@
 [package]
 name = "omnikee"
-version = "0.1.0"
+version = "0.1.1"
 description = "KeePass UI using web technologies"
 authors = ["Stefan Seemayer <stefan@seemayer.de>"]
 license = "AGPL"
