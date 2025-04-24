@@ -26,9 +26,11 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn @click="onLoadExample">Load Example</q-btn>
-          <q-btn color="primary" type="submit">Open</q-btn>
-          <q-btn>Reset</q-btn>
+          <q-btn-group>
+            <q-btn padding="sm lg" @click="onLoadExample">Load Example</q-btn>
+            <q-btn padding="sm lg" color="primary" type="submit">Open</q-btn>
+            <q-btn padding="sm lg">Reset</q-btn>
+          </q-btn-group>
         </q-card-actions>
       </q-card>
     </q-form>
