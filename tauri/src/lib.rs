@@ -28,6 +28,17 @@ fn list_entries(state: State<'_>, database_idx: usize, group_uuid: String) -> Ve
     state.list_entries(database_idx, group_uuid)
 }
 
+#[tauri::command]
+fn reveal_protected(
+    state: State<'_>,
+    database_idx: usize,
+    entry_uuid: String,
+    field_name: String,
+) -> Option<String> {
+    let state = state.lock().unwrap();
+    state.reveal_protected(database_idx, &entry_uuid, &field_name)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state: AppState = Default::default();
@@ -37,6 +48,7 @@ pub fn run() {
             list_databases,
             load_database,
             list_entries,
+            reveal_protected,
         ])
         .setup(|app| {
             app.manage(Mutex::new(state));

@@ -7,6 +7,7 @@ export interface OmniKee {
   loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>;
 
   listEntries(database_idx: number, group_uuid: string): Promise<Entry[]>,
+  revealProtected(database_idx: number, entry_uuid: string, field_name: string): Promise<string | undefined>,
 }
 
 let handle: OmniKee
@@ -26,6 +27,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database(data, password, keyfile))},
 
     listEntries(database_idx, group_uuid) {return Promise.resolve(state.list_entries(database_idx, group_uuid))},
+    revealProtected(database_idx, entry_uuid, field_name) {return Promise.resolve(state.reveal_protected(database_idx, entry_uuid, field_name))},
   }
 
 } else {
@@ -38,6 +40,10 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     async loadDatabase(data, password, keyfile) {return await invoke('load_database', {data, password, keyfile})},
 
     async listEntries(databaseIdx, groupUuid) {return await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})},
+    async revealProtected(databaseIdx, entryUuid, fieldName) {
+      return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
+    },
+
   }
 
 }
