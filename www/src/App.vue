@@ -9,36 +9,36 @@
           OmniKee
         </q-toolbar-title>
 
-        <q-btn flat round dense>
+        <q-btn flat round dense disabled>
           <q-icon name="mdi-content-save" />
-          <q-tooltip>Save Database</q-tooltip>
+          <q-tooltip>Save Database (not implemented)</q-tooltip>
         </q-btn>
 
-        <q-btn flat round dense>
+        <q-btn flat round dense disabled>
           <q-icon name="mdi-lock" />
-          <q-tooltip>Lock Database</q-tooltip>
+          <q-tooltip>Lock Database (not implemented)</q-tooltip>
         </q-btn>
 
         <q-separator dark vertical spaced inset />
 
-        <q-btn flat round dense>
+        <q-btn flat round dense disabled>
           <q-icon name="mdi-plus" />
-          <q-tooltip>Add Entry</q-tooltip>
+          <q-tooltip>Add Entry (not implemented)</q-tooltip>
         </q-btn>
 
-        <q-btn flat round dense>
+        <q-btn flat round dense disabled>
           <q-icon name="mdi-pencil" />
-          <q-tooltip>Edit Entry</q-tooltip>
+          <q-tooltip>Edit Entry (not implemented)</q-tooltip>
         </q-btn>
 
-        <q-btn flat round dense>
+        <q-btn flat round dense disabled>
           <q-icon name="mdi-delete" />
-          <q-tooltip>Delete Entry</q-tooltip>
+          <q-tooltip>Delete Entry (not implemented)</q-tooltip>
         </q-btn>
 
         <q-space />
 
-        <q-input v-model="searchText" clearable dense filled style="max-width: 200px">
+        <q-input v-model="searchText" shadow-text="Search..." clearable dense disable filled style="max-width: 200px">
           <template #prepend>
             <q-icon name="mdi-magnify" />
           </template>
