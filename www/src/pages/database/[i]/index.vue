@@ -80,9 +80,12 @@ const nodes = computed(() => {
 
 const selectedGroup = computed({
   get() {
-    return viewStore.current.group
+    return viewStore.current.group || viewStore.database?.root.uuid
   },
   set(v) {
+    if (typeof v === "undefined") {
+      v = viewStore.database?.root.uuid
+    }
     viewStore.current.group = v
   }
 })

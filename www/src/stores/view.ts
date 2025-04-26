@@ -39,8 +39,9 @@ export const useViewStore = defineStore('view', () => {
 
   const loadingGroupEntries = ref(false)
   const groupEntries = asyncComputed<Entry[] | undefined>(async () => {
-    if (typeof current.value.database === 'undefined' || !current.value.group) {return undefined}
-    return await ok.listEntries(current.value.database, current.value.group)
+    if (typeof current.value.database === 'undefined') {return undefined}
+    const group = current.value.group || database.value?.root.uuid
+    return await ok.listEntries(current.value.database, group)
   }, undefined, loadingGroupEntries)
 
 
