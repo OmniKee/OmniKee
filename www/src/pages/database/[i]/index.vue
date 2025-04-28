@@ -1,6 +1,6 @@
 <template>
   <q-page class="row">
-    <q-splitter v-model="splitter" class="col-grow">
+    <q-splitter v-model="splitter" class="col-grow main-splitter">
       <template #before>
         <q-scroll-area style="height: 100%; max-width: 100%;">
           <q-tree v-model:selected="selectedGroup" :nodes="nodes" node-key="uuid" selected-color="accent"
@@ -35,6 +35,26 @@
       </template>
 
     </q-splitter>
+
+    <q-list class="alternate-layout col" v-if="listItems">
+
+      <q-item clickable v-for="g in listItems.groups" :key="g.uuid" @click="onListGroupClick(g)">
+        <q-item-section avatar>
+          <q-avatar :icon="g.icon.startsWith('mdi-') ? g.icon : `img:${g.icon}`" v-if="g.icon" />
+        </q-item-section>
+        <q-item-section>{{ g.name }}</q-item-section>
+      </q-item>
+
+      <q-separator />
+      <q-item clickable v-for="e in listItems.entries" :key="e.uuid" @click="onDoubleClick(e)">
+        <q-item-section avatar>
+          <q-avatar :icon="e.icon.startsWith('mdi-') ? e.icon : `img:${e.icon}`" v-if="e.icon" />
+        </q-item-section>
+        <q-item-section>{{ e.name }}</q-item-section>
+      </q-item>
+    </q-list>
+
+
   </q-page>
 </template>
 
@@ -46,6 +66,7 @@ import {type QTableColumn, type QTreeNode} from 'quasar'
 import {useViewStore} from '@/stores/view'
 
 import {type Entry, type Group} from 'omnikee-wasm'
+import {asyncComputed} from '@vueuse/core'
 
 const route = useRoute('/database/[i]/')
 const router = useRouter()
@@ -56,6 +77,7 @@ viewStore.current.database = +route.params.i
 
 const splitter = ref(20)
 
+/** Nodes for the tree view in the normal layout */
 const nodes = computed(() => {
   if (!viewStore.database) {return []}
 
@@ -101,9 +123,83 @@ function onRowClick(_event: Event, entry: Entry) {
   viewStore.current.entry = entry.uuid
 }
 
-async function onDoubleClick(entry: Entry) {
+async function onDoubleClick(entry: Entry | ListItem) {
   viewStore.current.entry = entry.uuid
   await router.push({name: '/database/[i]/entry/[uuid]', params: {i: route.params.i, uuid: entry.uuid}})
 }
 
+type ListItem = {
+  type: 'group' | 'entry',
+  uuid: string,
+  name: string,
+  icon: string | undefined,
+}
+
+const listItems = asyncComputed(() => {
+  if (!viewStore.database) {return {groups: [], entries: []}}
+
+  function find(current: Group, parent: Group | undefined): {current: Group, parent: Group | undefined} | undefined {
+    if (current.uuid === selectedGroup.value) {
+      return {current, parent}
+    }
+
+    for (const child of current.children) {
+      const res = find(child, current)
+      if (typeof res !== "undefined") {return res}
+    }
+  }
+
+  const found = find(viewStore.database.root, undefined)
+  if (!found) {return {groups: [], entries: []}}
+
+  const {current, parent} = found
+
+  const groups: ListItem[] = current.children.map(c => ({
+    type: 'group',
+    uuid: c.uuid,
+    name: c.name,
+    icon: c.icon,
+  } as ListItem))
+
+  if (parent) {
+    groups.unshift({
+      type: 'group',
+      uuid: parent.uuid,
+      name: `[ up to ${parent.name} ]`,
+      icon: parent.icon,
+    } as ListItem)
+  }
+
+  const entries: ListItem[] = (viewStore.groupEntries || []).map(e => ({
+    type: 'entry',
+    uuid: e.uuid,
+    name: e.name,
+    icon: e.icon,
+  } as ListItem))
+
+  return {groups, entries}
+})
+
+function onListGroupClick(group: ListItem) {
+  console.log(group)
+  viewStore.current.group = group.uuid
+}
+
 </script>
+
+<style lang="scss" scoped>
+.alternate-layout {
+  display: none;
+}
+
+body.screen--sm,
+body.screen--xs {
+  .main-splitter {
+    display: none;
+  }
+
+  .alternate-layout {
+    display: block;
+  }
+}
+</style>
