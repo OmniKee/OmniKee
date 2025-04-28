@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <div class="window-buttons" v-if="app.is.tauri && !app.is.mac">
+  <div class="window-buttons" v-if="app.is.desktop && !app.is.mac">
     <img src="@/assets/window/minimize.svg" @click="onMinimize" />
     <img src="@/assets/window/maximize.svg" @click="onMaximize" />
     <img src="@/assets/window/close.svg" @click="onClose" />

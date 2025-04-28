@@ -2,12 +2,21 @@ import {defineStore} from "pinia"
 
 export const useAppStore = defineStore('app', () => {
 
-  const web = process.env.TAURI_ENV_PLATFORM === 'web'
+  const platform = process.env.TAURI_ENV_PLATFORM
+
+  const web = platform === 'web'
   const tauri = !web;
 
-  const mac = process.env.TAURI_ENV_PLATFORM === 'darwin'
-  const windows = process.env.TAURI_ENV_PLATFORM === 'windows'
-  const linux = process.env.TAURI_ENV_PLATFORM === 'linux'
+  const mac = platform === 'darwin'
+  const windows = platform === 'windows'
+  const linux = platform === 'linux'
+
+  const desktop = mac || windows || linux
+
+  const android = platform === 'android'
+  const ios = platform === 'ios'
+
+  const mobile = android || ios
 
 
   const is = {
@@ -17,7 +26,12 @@ export const useAppStore = defineStore('app', () => {
     mac,
     windows,
     linux,
+    desktop,
+
+    android,
+    ios,
+    mobile,
   }
 
-  return {is}
+  return {platform, is}
 })

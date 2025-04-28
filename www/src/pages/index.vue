@@ -37,6 +37,10 @@
 
     <q-footer class="q-pa-md row justify-end">
       <div>
+        platform: {{ app.platform }}
+      </div>
+      <q-separator class="q-mx-sm" vertical />
+      <div>
         <a href="https://omnikee.github.io/docs/getting-started/quick-start/" target="_blank">Docs</a>
       </div>
     </q-footer>
@@ -51,7 +55,10 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 
 import {useDatabasesStore} from '@/stores/databases'
+import {useAppStore} from '@/stores/app'
 
+
+const app = useAppStore()
 const databasesStore = useDatabasesStore()
 const router = useRouter()
 
@@ -100,6 +107,7 @@ async function onLoadExample() {
 .q-footer a {
   color: inherit;
   text-decoration: none;
+  font-weight: bold;
 
   &:hover {
     text-decoration: underline;
