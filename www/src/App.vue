@@ -49,7 +49,8 @@
       </q-toolbar>
 
       <q-tabs align="left" class="bg-secondary">
-        <img class="logo q-ml-sm" src="@/assets/logo.svg" alt="OmniKee logo" />
+        <img class="alternate q-ml-sm" src="@/assets/logo.svg" alt="OmniKee logo" />
+
         <q-route-tab :to="{name: '/'}">
           <q-icon name="mdi-folder-open" alt="Open Database" />
           <q-tooltip>Open&nbsp;Database</q-tooltip>
@@ -57,6 +58,10 @@
 
         <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]/', params: {i}}" :label="db.name"
           no-caps />
+
+
+        <q-space class="alternate" />
+        <window-buttons class="alternate" />
       </q-tabs>
     </q-header>
 
@@ -90,7 +95,7 @@ const searchText = ref("")
   text-transform: none;
 }
 
-.q-tabs .logo {
+.q-tabs .alternate {
   display: none;
 }
 
@@ -104,7 +109,7 @@ body.screen--xs {
     background-color: $primary !important;
   }
 
-  .q-tabs .logo {
+  .q-tabs .alternate {
     display: inline-block;
   }
 }
