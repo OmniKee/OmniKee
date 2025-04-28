@@ -34,6 +34,12 @@
         </q-card-actions>
       </q-card>
     </q-form>
+
+    <q-footer class="q-pa-md row justify-end">
+      <div>
+        <a href="https://omnikee.github.io/docs/getting-started/quick-start/" target="_blank">Docs</a>
+      </div>
+    </q-footer>
   </q-page>
 </template>
 
@@ -89,3 +95,14 @@ async function onLoadExample() {
 
 }
 </script>
+
+<style lang="scss" scoped>
+.q-footer a {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+</style>

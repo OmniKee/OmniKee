@@ -44,6 +44,7 @@ pub fn run() {
     let state: AppState = Default::default();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             list_databases,
             load_database,
