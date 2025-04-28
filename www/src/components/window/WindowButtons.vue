@@ -1,5 +1,5 @@
 <template>
-  <div class="window-buttons mac q-mr-sm" v-if="isMac">
+  <div class="window-buttons mac q-mr-sm" v-if="app.is.mac">
     <div class="close" @click="onClose">
       <img src="@/assets/window/close-mac.svg" />
     </div>
@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <div class="window-buttons" v-if="isTauri && !isMac">
+  <div class="window-buttons" v-if="app.is.tauri && !app.is.mac">
     <img src="@/assets/window/minimize.svg" @click="onMinimize" />
     <img src="@/assets/window/maximize.svg" @click="onMaximize" />
     <img src="@/assets/window/close.svg" @click="onClose" />
@@ -22,9 +22,9 @@
 
 <script setup lang="ts">
 import {getCurrentWindow} from '@tauri-apps/api/window'
+import {useAppStore} from '@/stores/app'
 
-const isTauri = process.env.TAURI_ENV_PLATFORM !== 'web'
-const isMac = process.env.TAURI_ENV_PLATFORM === 'darwin'
+const app = useAppStore()
 
 async function onMinimize() {
   const win = getCurrentWindow()
