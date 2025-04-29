@@ -220,7 +220,7 @@ jobs:
       - name: build app bundle
         working-directory: ./tauri
         run: |
-          tauri android build -v
+          cargo tauri android build -v
         env:
             NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
