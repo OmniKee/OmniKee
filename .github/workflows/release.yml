@@ -224,7 +224,7 @@ jobs:
         with:
           tag: app-${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
           draft: true
-          releaseName: "OmniKee ${{ github.ref_name }}"
+          name: "OmniKee ${{ github.ref_name }}"
           files: |
             tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
             tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
