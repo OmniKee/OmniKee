@@ -176,7 +176,7 @@ jobs:
           targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android,  x86_64-linux-android
 
       - name: install Tauri CLI
-        run: npm install -g @tauri-apps/cli@latest
+        run: cargo install tauri-cli --version "^2.0.0" --locked
 
       - name: install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
