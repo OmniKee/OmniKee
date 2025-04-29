@@ -1,11 +1,9 @@
 name: "publish"
 
-on: push
-
-#on:
-#  push:
-#    tags:
-#      - v*
+on:
+  push:
+    tags:
+      - v*
 
 jobs:
 
@@ -65,190 +63,190 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  #publish-tauri:
-  #  permissions:
-  #    contents: write
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      include:
-  #        - platform: "macos-latest" # for Arm based macs (M1 and above).
-  #          args: "--target aarch64-apple-darwin"
-  #        - platform: "macos-latest" # for Intel based macs.
-  #          args: "--target x86_64-apple-darwin"
-  #        - platform: "ubuntu-24.04"
-  #          args: ""
-  #        - platform: "windows-latest"
-  #          args: ""
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest" # for Arm based macs (M1 and above).
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs.
+            args: "--target x86_64-apple-darwin"
+          - platform: "ubuntu-24.04"
+            args: ""
+          - platform: "windows-latest"
+            args: ""
 
-  #  runs-on: ${{ matrix.platform }}
-  #  steps:
-  #    - uses: actions/checkout@v4
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
 
-  #    - name: setup node
-  #      uses: actions/setup-node@v4
-  #      with:
-  #        node-version: lts/*
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
-  #    - name: install Rust stable
-  #      uses: dtolnay/rust-toolchain@stable
-  #      with:
-  #        # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-  #        targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-  #    - name: install wasm-pack
-  #      uses: jetli/wasm-pack-action@v0.4.0
-  #      with:
-  #        # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-  #        version: 'latest'
+      - name: install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
 
-  #    - name: install dependencies (ubuntu only)
-  #      if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
-  #      run: |
-  #        sudo apt-get update
-  #        sudo apt-get install -y \
-  #          libwebkit2gtk-4.1-0=2.44.0-2 \
-  #          libwebkit2gtk-4.1-dev=2.44.0-2 \
-  #          libjavascriptcoregtk-4.1-0=2.44.0-2 \
-  #          libjavascriptcoregtk-4.1-dev=2.44.0-2 \
-  #          gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
-  #          gir1.2-webkit2-4.1=2.44.0-2 \
-  #          libappindicator3-dev \
-  #          librsvg2-dev \
-  #          patchelf
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-0=2.44.0-2 \
+            libwebkit2gtk-4.1-dev=2.44.0-2 \
+            libjavascriptcoregtk-4.1-0=2.44.0-2 \
+            libjavascriptcoregtk-4.1-dev=2.44.0-2 \
+            gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
+            gir1.2-webkit2-4.1=2.44.0-2 \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
 
-  #    - name: install frontend dependencies
-  #      working-directory: ./www
-  #      run: npm install
+      - name: install frontend dependencies
+        working-directory: ./www
+        run: npm install
 
-  #    - name: patch out WASM optimization (mac only)
-  #      if: matrix.platform == 'macos-latest'
-  #      run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> lib/Cargo.toml
+      - name: patch out WASM optimization (mac only)
+        if: matrix.platform == 'macos-latest'
+        run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> lib/Cargo.toml
 
-  #    - name: bundle WebAssembly library (for types)
-  #      working-directory: ./lib
-  #      env:
-  #        RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
-  #      run: wasm-pack build -t web
+      - name: bundle WebAssembly library (for types)
+        working-directory: ./lib
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
+        run: wasm-pack build -t web
 
-  #    - uses: tauri-apps/tauri-action@v0
-  #      env:
-  #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #      with:
-  #        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-  #        projectPath: ./tauri
-  #        releaseName: "OmniKee v__VERSION__"
-  #        releaseBody: "See the assets to download this version and install."
-  #        releaseDraft: true
-  #        prerelease: false
-  #        args: ${{ matrix.args }}
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          projectPath: ./tauri
+          releaseName: "OmniKee v__VERSION__"
+          releaseBody: "See the assets to download this version and install."
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
 
 
-  #publish-android:
-  #  runs-on: ubuntu-latest
-  #  permissions:
-  #    contents: write
-  #    id-token: write
+  publish-android:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
 
-  #  steps:
-  #    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #    - name: setup node
-  #      uses: actions/setup-node@v4
-  #      with:
-  #        node-version: lts/*
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
-  #    - name: Setup Java
-  #      uses: actions/setup-java@v4
-  #      with:
-  #          distribution: 'zulu'
-  #          java-version: '17'
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+            distribution: 'zulu'
+            java-version: '17'
 
-  #    - name: Setup Android SDK
-  #      uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-  #    - name: Install NDK
-  #      run: sdkmanager "ndk;27.0.11902837"
+      - name: Install NDK
+        run: sdkmanager "ndk;27.0.11902837"
 
-  #    - name: install Rust stable
-  #      uses: dtolnay/rust-toolchain@stable
-  #      with:
-  #        targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android,  x86_64-linux-android
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android,  x86_64-linux-android
 
-  #    - name: install Tauri CLI
-  #      run: cargo install tauri-cli --version "^2.0.0" --locked
+      - name: install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0.0" --locked
 
-  #    - name: install wasm-pack
-  #      uses: jetli/wasm-pack-action@v0.4.0
-  #      with:
-  #        # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-  #        version: 'latest'
+      - name: install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
 
-  #    - name: install dependencies (ubuntu only)
-  #      if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
-  #      run: |
-  #        sudo apt-get update
-  #        sudo apt-get install -y \
-  #          libwebkit2gtk-4.1-0=2.44.0-2 \
-  #          libwebkit2gtk-4.1-dev=2.44.0-2 \
-  #          libjavascriptcoregtk-4.1-0=2.44.0-2 \
-  #          libjavascriptcoregtk-4.1-dev=2.44.0-2 \
-  #          gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
-  #          gir1.2-webkit2-4.1=2.44.0-2 \
-  #          libappindicator3-dev \
-  #          librsvg2-dev \
-  #          patchelf
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-0=2.44.0-2 \
+            libwebkit2gtk-4.1-dev=2.44.0-2 \
+            libjavascriptcoregtk-4.1-0=2.44.0-2 \
+            libjavascriptcoregtk-4.1-dev=2.44.0-2 \
+            gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
+            gir1.2-webkit2-4.1=2.44.0-2 \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
 
-  #    - name: install frontend dependencies
-  #      working-directory: ./www
-  #      run: npm install
+      - name: install frontend dependencies
+        working-directory: ./www
+        run: npm install
 
-  #    - name: bundle WebAssembly library (for types)
-  #      working-directory: ./lib
-  #      env:
-  #        RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
-  #      run: wasm-pack build -t web
+      - name: bundle WebAssembly library (for types)
+        working-directory: ./lib
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
+        run: wasm-pack build -t web
 
-  #    - name: setup Android signing
-  #      working-directory: ./tauri/gen/android
-  #      run: |
-  #        echo "keyAlias=upload" > keystore.properties
-  #        echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
-  #        base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
-  #        echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
+      - name: setup Android signing
+        working-directory: ./tauri/gen/android
+        run: |
+          echo "keyAlias=upload" > keystore.properties
+          echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
+          base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
+          echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
-  #    - name: build app bundle
-  #      working-directory: ./tauri
-  #      run: |
-  #        cargo tauri android build -v
-  #      env:
-  #          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+      - name: build app bundle
+        working-directory: ./tauri
+        run: |
+          cargo tauri android build -v
+        env:
+            NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
-  #    - name: upload APK to release
-  #      uses: softprops/action-gh-release@v2
-  #      with:
-  #        tag: app-${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
-  #        draft: true
-  #        fail_on_unmatched_files: true
-  #        name: "OmniKee ${{ github.ref_name }}"
-  #        files: |
-  #          tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
-  #          tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
+      - name: upload APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag: app-${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          draft: true
+          fail_on_unmatched_files: true
+          name: "OmniKee ${{ github.ref_name }}"
+          files: |
+            tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+            tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
 
-  #    - name: upload to Google Play Console
-  #      uses: Wandalen/wretry.action@master
-  #      with:
-  #        action: r0adkll/upload-google-play@v1
-  #        attempt_limit: 5
-  #        with: |
-  #          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
-  #          packageName: de.semicolonsoftware.omnikee
-  #          releaseFiles: tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
-  #          track: internal
-  #          status: draft
-  #          #inAppUpdatePriority: 2
-  #          #userFraction: 0.5
-  #          #whatsNewDirectory: distribution/whatsnew
-  #          #mappingFile: app/build/outputs/mapping/release/mapping.txt
-  #          #debugSymbols: app/intermediates/merged_native_libs/release/out/lib
+      - name: upload to Google Play Console
+        uses: Wandalen/wretry.action@master
+        with:
+          action: r0adkll/upload-google-play@v1
+          attempt_limit: 5
+          with: |
+            serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
+            packageName: de.semicolonsoftware.omnikee
+            releaseFiles: tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
+            track: internal
+            status: draft
+            #inAppUpdatePriority: 2
+            #userFraction: 0.5
+            #whatsNewDirectory: distribution/whatsnew
+            #mappingFile: app/build/outputs/mapping/release/mapping.txt
+            #debugSymbols: app/intermediates/merged_native_libs/release/out/lib
 
