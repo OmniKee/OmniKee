@@ -1,9 +1,11 @@
 name: "publish"
 
-on:
-  push:
-    tags:
-      - v*
+on: push
+
+#on:
+#  push:
+#    tags:
+#      - v*
 
 jobs:
 
@@ -173,6 +175,9 @@ jobs:
         with:
           targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android,  x86_64-linux-android
 
+      - name: install Tauri CLI
+        run: npm install -g @tauri-apps/cli@latest
+
       - name: install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
@@ -215,17 +220,16 @@ jobs:
       - name: build app bundle
         working-directory: ./tauri
         run: |
-          npm install -g @tauri-apps/cli@latest
           tauri android build -v
         env:
             NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
-
 
       - name: upload APK to release
         uses: softprops/action-gh-release@v2
         with:
           tag: app-${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
           draft: true
+          fail_on_unmatched_files: true
           name: "OmniKee ${{ github.ref_name }}"
           files: |
             tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
