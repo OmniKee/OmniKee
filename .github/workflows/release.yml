@@ -121,7 +121,7 @@ jobs:
 
       - name: patch out WASM optimization (mac only)
         if: matrix.platform == 'macos-latest'
-        run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> tauri/Cargo.toml
+        run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> lib/Cargo.toml
 
       - name: bundle WebAssembly library (for types)
         working-directory: ./lib
