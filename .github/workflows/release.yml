@@ -241,7 +241,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
           packageName: de.semicolonsoftware.omnikee
           releaseFiles: tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
-          track: qa
+          track: internal
           status: draft
           inAppUpdatePriority: 2
           #userFraction: 0.5
