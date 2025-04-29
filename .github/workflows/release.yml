@@ -236,16 +236,19 @@ jobs:
             tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
 
       - name: upload to Google Play Console
-        uses: r0adkll/upload-google-play@v1
+        uses: Wandalen/wretry.action@master
         with:
-          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
-          packageName: de.semicolonsoftware.omnikee
-          releaseFiles: tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
-          track: internal
-          status: draft
-          #inAppUpdatePriority: 2
-          #userFraction: 0.5
-          #whatsNewDirectory: distribution/whatsnew
-          #mappingFile: app/build/outputs/mapping/release/mapping.txt
-          #debugSymbols: app/intermediates/merged_native_libs/release/out/lib
+          action: r0adkll/upload-google-play@v1
+          attempt_limit: 5
+          with: |
+            serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
+            packageName: de.semicolonsoftware.omnikee
+            releaseFiles: tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
+            track: internal
+            status: draft
+            #inAppUpdatePriority: 2
+            #userFraction: 0.5
+            #whatsNewDirectory: distribution/whatsnew
+            #mappingFile: app/build/outputs/mapping/release/mapping.txt
+            #debugSymbols: app/intermediates/merged_native_libs/release/out/lib
 
