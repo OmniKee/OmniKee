@@ -7,139 +7,139 @@ on:
 
 jobs:
 
-  publish-web:
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
+  #publish-web:
+  #  permissions:
+  #    contents: write
+  #    pages: write
+  #    id-token: write
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  #  environment:
+  #    name: github-pages
+  #    url: ${{ steps.deployment.outputs.page_url }}
 
-    runs-on: "ubuntu-24.04"
-    steps:
-      - uses: actions/checkout@v4
+  #  runs-on: "ubuntu-24.04"
+  #  steps:
+  #    - uses: actions/checkout@v4
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+  #    - name: setup node
+  #      uses: actions/setup-node@v4
+  #      with:
+  #        node-version: lts/*
 
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+  #    - name: install Rust stable
+  #      uses: dtolnay/rust-toolchain@stable
+  #      with:
+  #        # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+  #        targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-          version: 'latest'
+  #    - name: install wasm-pack
+  #      uses: jetli/wasm-pack-action@v0.4.0
+  #      with:
+  #        # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+  #        version: 'latest'
 
-      - name: install frontend dependencies
-        working-directory: ./www
-        run: npm install
+  #    - name: install frontend dependencies
+  #      working-directory: ./www
+  #      run: npm install
 
-      - name: bundle WebAssembly library
-        working-directory: ./lib
-        env:
-          RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
-        run: wasm-pack build -t web
+  #    - name: bundle WebAssembly library
+  #      working-directory: ./lib
+  #      env:
+  #        RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
+  #      run: wasm-pack build -t web
 
-      - name: build SPA
-        working-directory: ./www
-        env:
-          PUBLIC_PATH: '/OmniKee'
-        run: npm run build
+  #    - name: build SPA
+  #      working-directory: ./www
+  #      env:
+  #        PUBLIC_PATH: '/OmniKee'
+  #      run: npm run build
 
-      - name: Upload static files as artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./www/dist/spa
+  #    - name: Upload static files as artifact
+  #      uses: actions/upload-pages-artifact@v3
+  #      with:
+  #        path: ./www/dist/spa
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  #    - name: Deploy to GitHub Pages
+  #      id: deployment
+  #      uses: actions/deploy-pages@v4
 
-  publish-tauri:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: "macos-latest" # for Arm based macs (M1 and above).
-            args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-24.04"
-            args: ""
-          - platform: "windows-latest"
-            args: ""
+  #publish-tauri:
+  #  permissions:
+  #    contents: write
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      include:
+  #        - platform: "macos-latest" # for Arm based macs (M1 and above).
+  #          args: "--target aarch64-apple-darwin"
+  #        - platform: "macos-latest" # for Intel based macs.
+  #          args: "--target x86_64-apple-darwin"
+  #        - platform: "ubuntu-24.04"
+  #          args: ""
+  #        - platform: "windows-latest"
+  #          args: ""
 
-    runs-on: ${{ matrix.platform }}
-    steps:
-      - uses: actions/checkout@v4
+  #  runs-on: ${{ matrix.platform }}
+  #  steps:
+  #    - uses: actions/checkout@v4
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+  #    - name: setup node
+  #      uses: actions/setup-node@v4
+  #      with:
+  #        node-version: lts/*
 
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+  #    - name: install Rust stable
+  #      uses: dtolnay/rust-toolchain@stable
+  #      with:
+  #        # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+  #        targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-          version: 'latest'
+  #    - name: install wasm-pack
+  #      uses: jetli/wasm-pack-action@v0.4.0
+  #      with:
+  #        # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+  #        version: 'latest'
 
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-0=2.44.0-2 \
-            libwebkit2gtk-4.1-dev=2.44.0-2 \
-            libjavascriptcoregtk-4.1-0=2.44.0-2 \
-            libjavascriptcoregtk-4.1-dev=2.44.0-2 \
-            gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
-            gir1.2-webkit2-4.1=2.44.0-2 \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf
+  #    - name: install dependencies (ubuntu only)
+  #      if: matrix.platform == 'ubuntu-24.04' # This must match the platform value defined above.
+  #      run: |
+  #        sudo apt-get update
+  #        sudo apt-get install -y \
+  #          libwebkit2gtk-4.1-0=2.44.0-2 \
+  #          libwebkit2gtk-4.1-dev=2.44.0-2 \
+  #          libjavascriptcoregtk-4.1-0=2.44.0-2 \
+  #          libjavascriptcoregtk-4.1-dev=2.44.0-2 \
+  #          gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
+  #          gir1.2-webkit2-4.1=2.44.0-2 \
+  #          libappindicator3-dev \
+  #          librsvg2-dev \
+  #          patchelf
 
-      - name: install frontend dependencies
-        working-directory: ./www
-        run: npm install
+  #    - name: install frontend dependencies
+  #      working-directory: ./www
+  #      run: npm install
 
-      - name: patch out WASM optimization (mac only)
-        if: matrix.platform == 'macos-latest'
-        run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> lib/Cargo.toml
+  #    - name: patch out WASM optimization (mac only)
+  #      if: matrix.platform == 'macos-latest'
+  #      run: echo -e "[package.metadata.wasm-pack.profile.release]\nwasm-opt = false" >> lib/Cargo.toml
 
-      - name: bundle WebAssembly library (for types)
-        working-directory: ./lib
-        env:
-          RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
-        run: wasm-pack build -t web
+  #    - name: bundle WebAssembly library (for types)
+  #      working-directory: ./lib
+  #      env:
+  #        RUSTFLAGS: '--cfg getrandom_backend="wasm_js"'
+  #      run: wasm-pack build -t web
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          projectPath: ./tauri
-          releaseName: "OmniKee v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+  #    - uses: tauri-apps/tauri-action@v0
+  #      env:
+  #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #      with:
+  #        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+  #        projectPath: ./tauri
+  #        releaseName: "OmniKee v__VERSION__"
+  #        releaseBody: "See the assets to download this version and install."
+  #        releaseDraft: true
+  #        prerelease: false
+  #        args: ${{ matrix.args }}
 
 
   publish-android:
