@@ -5,9 +5,10 @@ import {type DatabaseOverview, type Entry} from 'omnikee-wasm'
 export interface OmniKee {
   listDatabases(): Promise<DatabaseOverview[]>;
   loadDatabase(data: Uint8Array, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>;
+  closeDatabase(databaseIdx: number): Promise<void>,
 
-  listEntries(database_idx: number, group_uuid: string): Promise<Entry[]>,
-  revealProtected(database_idx: number, entry_uuid: string, field_name: string): Promise<string | undefined>,
+  listEntries(databaseIdx: number, groupUuid: string): Promise<Entry[]>,
+  revealProtected(databaseIdx: number, entryUuid: string, fieldName: string): Promise<string | undefined>,
 }
 
 let handle: OmniKee
@@ -25,9 +26,10 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
   handle = {
     listDatabases() {return Promise.resolve(state.list_databases())},
     loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database(data, password, keyfile))},
+    closeDatabase(databaseIdx) {return Promise.resolve(state.close_database(databaseIdx))},
 
-    listEntries(database_idx, group_uuid) {return Promise.resolve(state.list_entries(database_idx, group_uuid))},
-    revealProtected(database_idx, entry_uuid, field_name) {return Promise.resolve(state.reveal_protected(database_idx, entry_uuid, field_name))},
+    listEntries(databaseIdx, groupUuid) {return Promise.resolve(state.list_entries(databaseIdx, groupUuid))},
+    revealProtected(databaseIdx, entryUuid, fieldName) {return Promise.resolve(state.reveal_protected(databaseIdx, entryUuid, fieldName))},
   }
 
 } else {
@@ -38,6 +40,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
   handle = {
     async listDatabases() {return await invoke('list_databases')},
     async loadDatabase(data, password, keyfile) {return await invoke('load_database', {data, password, keyfile})},
+    async closeDatabase(databaseIdx) {return await invoke('close_database', {databaseIdx})},
 
     async listEntries(databaseIdx, groupUuid) {return await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})},
     async revealProtected(databaseIdx, entryUuid, fieldName) {

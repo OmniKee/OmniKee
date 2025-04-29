@@ -23,6 +23,12 @@ fn load_database(
 }
 
 #[tauri::command]
+fn close_database(state: State<'_>, database_idx: usize) -> Result<(), String> {
+    let mut state = state.lock().unwrap();
+    state.close_database(database_idx)
+}
+
+#[tauri::command]
 fn list_entries(state: State<'_>, database_idx: usize, group_uuid: String) -> Vec<Entry> {
     let state = state.lock().unwrap();
     state.list_entries(database_idx, group_uuid)
@@ -48,6 +54,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_databases,
             load_database,
+            close_database,
             list_entries,
             reveal_protected,
         ])

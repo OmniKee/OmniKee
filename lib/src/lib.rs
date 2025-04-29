@@ -166,6 +166,17 @@ impl AppState {
         Ok(res)
     }
 
+    /// Close a database
+    pub fn close_database(&mut self, database_idx: usize) -> Result<(), String> {
+        if database_idx >= self.databases.len() {
+            return Err("No database by that index".to_string());
+        }
+
+        self.databases.remove(database_idx);
+
+        Ok(())
+    }
+
     /// List the entries directly contained within a group of a database
     pub fn list_entries(&self, database_idx: usize, group_uuid: String) -> Vec<Entry> {
         let Ok(group_uuid) = Uuid::from_str(&group_uuid) else {

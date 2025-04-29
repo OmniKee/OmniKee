@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {type QTableColumn, type QTreeNode} from 'quasar'
 
@@ -73,7 +73,13 @@ const router = useRouter()
 
 const viewStore = useViewStore()
 
-viewStore.current.database = +route.params.i
+function updateRoute() {
+  viewStore.current.database = +route.params.i
+}
+
+updateRoute()
+watch(route, updateRoute)
+
 
 const splitter = ref(20)
 

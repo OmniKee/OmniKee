@@ -56,8 +56,15 @@
           <q-tooltip>Open&nbsp;Database</q-tooltip>
         </q-route-tab>
 
-        <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]/', params: {i}}" :label="db.name"
-          no-caps />
+        <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]/', params: {i}}" no-caps>
+
+          <div>
+            {{ db.name }}
+            <q-btn class="col" flat round icon="mdi-close" size="xs"
+              @click.prevent.stop="databasesStore.closeDatabase(i)" />
+          </div>
+
+        </q-route-tab>
 
 
         <q-space class="alternate" />
