@@ -216,8 +216,8 @@ jobs:
       - name: build app bundle
         working-directory: ./tauri
         run: |
-          npm install -D @tauri-apps/cli@latest
-          npm run tauri android build -v
+          cargo install tauri-cli
+          npm cargo tauri android build -v
         env:
             NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
