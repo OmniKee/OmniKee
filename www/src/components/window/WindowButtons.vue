@@ -1,22 +1,23 @@
 <template>
-  <div class="window-buttons mac q-mr-sm" v-if="app.is.mac">
-    <div class="close" @click="onClose">
-      <img src="@/assets/window/close-mac.svg" />
-    </div>
+  <div class="window-buttons">
+    <div class="wb mac q-mr-sm" v-if="app.is.mac">
+      <div class="close" @click="onClose">
+        <img src="@/assets/window/close-mac.svg" />
+      </div>
 
-    <div class="minimize" @click="onMinimize">
-      <img src="@/assets/window/minimize-mac.svg" />
-    </div>
+      <div class="minimize" @click="onMinimize">
+        <img src="@/assets/window/minimize-mac.svg" />
+      </div>
 
-    <div class="maximize" @click="onMaximize">
-      <img src="@/assets/window/maximize-mac.svg" />
+      <div class="maximize" @click="onMaximize">
+        <img src="@/assets/window/maximize-mac.svg" />
+      </div>
     </div>
-  </div>
-
-  <div class="window-buttons" v-if="app.is.desktop && !app.is.mac">
-    <img src="@/assets/window/minimize.svg" @click="onMinimize" />
-    <img src="@/assets/window/maximize.svg" @click="onMaximize" />
-    <img src="@/assets/window/close.svg" @click="onClose" />
+    <div class="wb win-linux" v-if="app.is.desktop && !app.is.mac">
+      <img src="@/assets/window/minimize.svg" @click="onMinimize" />
+      <img src="@/assets/window/maximize.svg" @click="onMaximize" />
+      <img src="@/assets/window/close.svg" @click="onClose" />
+    </div>
   </div>
 </template>
 
@@ -53,8 +54,8 @@ async function onClose() {
   .maximize {
     background: #fff;
     border-radius: 100%;
-    width: 2vh;
-    height: 2vh;
+    width: 18px;
+    height: 18px;
 
     margin: 0 6px 0 6px;
     display: flex;
@@ -80,11 +81,11 @@ async function onClose() {
   }
 }
 
-.mac.window-buttons:hover img {
+.mac:hover img {
   opacity: 1;
 }
 
-.window-buttons {
+.wb {
   display: flex;
   flex-direction: row;
 
