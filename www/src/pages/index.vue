@@ -1,6 +1,8 @@
 <template>
   <q-page class="row items-center justify-evenly">
 
+    <img class="background" src="@/assets/logo.svg" />
+
     <q-form style="width: 80%" @submit.prevent.stop="onSubmit">
       <q-card>
         <q-card-section>
@@ -146,6 +148,14 @@ async function onLoadExample() {
 </script>
 
 <style lang="scss" scoped>
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  opacity: 0.1;
+}
+
 .password {
   font-family: monospace;
 }
