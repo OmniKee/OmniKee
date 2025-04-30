@@ -17,7 +17,8 @@
 
 
       <template #after>
-        <q-tab-panels v-model="tab" animated swipeable vertical transition-prev="jump-up" transition-next="jump-up">
+        <q-tab-panels style="height: 100%" v-model="tab" animated swipeable vertical transition-prev="jump-up"
+          transition-next="jump-up">
 
           <q-tab-panel name="entry">
 
@@ -35,10 +36,31 @@
 
           </q-tab-panel>
 
-          <q-tab-panel name="advanced" v-if="entry">
+          <q-tab-panel class="row no-padding" name="advanced" v-if="entry">
+            <q-splitter class="col-grow" v-model="advancedSplit" unit="px" :limits="[100, Infinity]">
+              <template #before>
+                <q-list>
+                  <q-item active-class="bg-primary text-white" v-for="field, i in fields" :key="i" clickable
+                    :active="selectedField == field.field" @click="selectedField = field.field">
+                    <q-item-section avatar>
+                      <q-avatar :icon="field.icon" />
+                    </q-item-section>
 
-            <h1> Advanced</h1>
+                    <q-item-section>
+                      {{ field.field }}
+                    </q-item-section>
+                  </q-item>
 
+                </q-list>
+              </template>
+
+              <template #after>
+                <div class="q-pa-sm">
+                  <FieldInput copy v-if="selectedField" :entry="entry" :field="selectedField" :label="selectedField" />
+                </div>
+              </template>
+
+            </q-splitter>
           </q-tab-panel>
 
         </q-tab-panels>
@@ -55,6 +77,7 @@ import {useRoute} from 'vue-router'
 import {useViewStore} from '@/stores/view'
 
 import ok from '@/omnikee'
+import {type Value} from 'omnikee-wasm'
 
 const route = useRoute('/database/[i]/entry/[uuid]')
 
@@ -68,8 +91,32 @@ const entry = computed(() => viewStore.entry)
 
 const tab = ref("entry")
 
+const advancedSplit = ref(200)
+
 async function onOpen(url: string) {
   await ok.openExternalLink(url)
 }
+
+const defaultFields = new Set(['UserName', 'Password', 'Title', 'URL'])
+
+const selectedField = ref<string | undefined>(undefined)
+
+const fields = computed(() => {
+  if (!entry.value) {return []}
+
+  const entries: [string, Value][] = ('entries' in entry.value.fields ? [...entry.value.fields.entries()] : Object.entries(entry.value.fields))
+  return entries.map(([field, fieldValue]) => {
+    if (fieldValue === 'Protected') {
+      return {field, type: 'Protected', icon: 'mdi-lock'}
+
+    } else if ('Unprotected' in fieldValue) {
+      return {field, type: 'Unprotected', icon: 'mdi-text'}
+
+    } else if ('Bytes' in fieldValue) {
+      return {field, type: 'Bytes', icon: 'mdi-file'}
+    }
+  }).filter((e) => typeof e !== 'undefined')
+    .filter((e) => !defaultFields.has(e.field))
+})
 
 </script>
