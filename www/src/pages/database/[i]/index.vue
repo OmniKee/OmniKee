@@ -1,21 +1,21 @@
 <template>
   <q-page class="row">
     <q-splitter v-model="splitter" class="col-grow main-splitter">
+
       <template #before>
-        <q-scroll-area style="height: 100%; max-width: 100%;">
-          <q-tree v-model:selected="selectedGroup" :nodes="nodes" node-key="uuid" selected-color="accent"
-            default-expand-all dense>
-            <template #default-header="{node}">
-              <q-avatar size="lg" v-if="node.avatar" :icon="node.avatar" />
-
-              {{ node.label }}
-
-            </template>
-
-          </q-tree>
-        </q-scroll-area>
-
+        <q-card style="height: 100%; max-width: 100%;">
+          <q-scroll-area style="height: 100%; max-width: 100%;">
+            <q-tree v-model:selected="selectedGroup" :nodes="nodes" node-key="uuid" selected-color="accent"
+              default-expand-all dense>
+              <template #default-header="{node}">
+                <q-avatar size="lg" v-if="node.avatar" :icon="node.avatar" />
+                {{ node.label }}
+              </template>
+            </q-tree>
+          </q-scroll-area>
+        </q-card>
       </template>
+
       <template #after>
         <q-scroll-area style="height: 100%; max-width: 100%;">
           <q-table class="entries" v-if="viewStore.groupEntries" :rows="viewStore.groupEntries"
