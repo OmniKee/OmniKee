@@ -6,7 +6,7 @@
 
   <q-page class="row" v-if="entry">
 
-    <q-splitter v-model="splitter" class="col-grow">
+    <q-splitter v-model="splitter" unit="px" :limits="[100, Infinity]" class="col-grow">
 
       <template #before>
         <q-tabs v-model="tab" vertical>
@@ -21,29 +21,24 @@
 
           <q-tab-panel name="entry">
 
-            <q-input class="q-mb-sm" v-model="entry.name" label="Title" filled />
-
-            <q-input class="q-mb-sm" v-model="entry.user_name" label="Username" filled />
-
-            <q-input class="q-mb-sm" v-model="password" :type="showPassword ? 'text' : 'password'" label="Password"
-              filled readonly>
-              <template #append>
-                <q-btn flat :icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click="showPassword = !showPassword">
-                  <q-tooltip>Show/Hide Password</q-tooltip>
+            <FieldInput class="q-mb-sm" filled :entry="entry" field="Title" label="Title" />
+            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="UserName" label="Username" />
+            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="Password" label="Password" />
+            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="URL" label="URL">
+              <template #append="{field}">
+                <q-btn flat v-if="field?.value" @click="onOpen(field.value)" icon="mdi-open-in-new" target="_blank">
+                  <q-tooltip>Open in Browser</q-tooltip>
                 </q-btn>
-                <q-btn flat icon="mdi-content-copy" @click="onCopy">
-                  <q-tooltip>Copy to Clipboard</q-tooltip>
-                </q-btn>
-
-
               </template>
 
-            </q-input>
+            </FieldInput>
 
           </q-tab-panel>
 
-          <q-tab-panel name="advanced">
-            <h1>Advanced</h1>
+          <q-tab-panel name="advanced" v-if="entry">
+
+            <h1> Advanced</h1>
+
           </q-tab-panel>
 
         </q-tab-panels>
@@ -56,7 +51,6 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import {asyncComputed} from '@vueuse/core'
 
 import {useViewStore} from '@/stores/view'
 
@@ -69,39 +63,13 @@ const viewStore = useViewStore()
 viewStore.current.database = +route.params.i
 viewStore.current.entry = route.params.uuid
 
-const splitter = ref(10)
+const splitter = ref(100)
 const entry = computed(() => viewStore.entry)
-
 
 const tab = ref("entry")
 
-const showPassword = ref(false)
-
-
-const password = asyncComputed(async () => {
-  if (typeof viewStore.current.database === "undefined" || !viewStore.current.entry) {return undefined}
-
-  const show = showPassword.value
-  const pwd = await ok.revealProtected(viewStore.current.database, viewStore.current.entry, "Password")
-
-  if (show) {
-    return pwd
-  } else if (pwd) {
-    return "*".repeat(pwd.length)
-  } else {
-    return undefined
-  }
-
-}, undefined)
-
-async function onCopy() {
-  if (typeof viewStore.current.database === "undefined" || !viewStore.current.entry) {return }
-  const pwd = await ok.revealProtected(viewStore.current.database, viewStore.current.entry, "Password")
-
-  if (typeof pwd === "undefined") {return }
-
-  await navigator.clipboard.writeText(pwd)
-
+async function onOpen(url: string) {
+  await ok.openExternalLink(url)
 }
 
 </script>

@@ -9,6 +9,8 @@ export interface OmniKee {
 
   listEntries(databaseIdx: number, groupUuid: string): Promise<Entry[]>,
   revealProtected(databaseIdx: number, entryUuid: string, fieldName: string): Promise<string | undefined>,
+
+  openExternalLink(url: string): Promise<void>,
 }
 
 let handle: OmniKee
@@ -30,12 +32,18 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
     listEntries(databaseIdx, groupUuid) {return Promise.resolve(state.list_entries(databaseIdx, groupUuid))},
     revealProtected(databaseIdx, entryUuid, fieldName) {return Promise.resolve(state.reveal_protected(databaseIdx, entryUuid, fieldName))},
+
+    openExternalLink(url) {
+      window.open(url)
+      return Promise.resolve()
+    },
   }
 
 } else {
   console.log("OmniKee will dispatch commands to Tauri backend")
 
   const {invoke} = await import('@tauri-apps/api/core')
+  const {openUrl} = await import('@tauri-apps/plugin-opener')
 
   handle = {
     async listDatabases() {return await invoke('list_databases')},
@@ -46,6 +54,10 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     async revealProtected(databaseIdx, entryUuid, fieldName) {
       return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
     },
+
+    async openExternalLink(url) {
+      await openUrl(url)
+    }
 
   }
 

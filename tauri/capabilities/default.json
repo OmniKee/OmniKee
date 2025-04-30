@@ -16,7 +16,7 @@
       "identifier": "opener:allow-open-url",
       "allow": [
         {
-          "url": "https://omnikee.github.io/**/*"
+          "url": "*"
         }
       ]
     }
