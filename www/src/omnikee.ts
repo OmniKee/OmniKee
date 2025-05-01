@@ -66,7 +66,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     async revealProtected(databaseIdx, entryUuid, fieldName) {
       return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
     },
-    async getOtp(databaseIdx, entryUuid, time) {return await invoke("get_otp", {databaseIdx, entryUuid, time})},
+    async getOtp(databaseIdx, entryUuid, time) {return await invoke("get_otp", {databaseIdx, entryUuid, time: Number(time)})},
 
     async openExternalLink(url) {
       const {openUrl} = await import('@tauri-apps/plugin-opener')
