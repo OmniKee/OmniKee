@@ -122,7 +122,7 @@ const nodes = computed(() => {
     const out: QTreeNode = {
       label: node.name,
       uuid: node.uuid,
-      children: node.children.map(translate)
+      children: (node.children || []).map(translate)
     }
 
     if (node.icon && node.icon.startsWith("mdi-")) {
