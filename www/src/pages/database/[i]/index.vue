@@ -33,7 +33,7 @@
             </template>
 
             <template #body-cell-name="{row}">
-              <q-td @dblclick="onDoubleClick(row)">
+              <q-td class="text-weight-bold" @dblclick="onDoubleClick(row)">
                 {{ row.name }}
               </q-td>
             </template>
@@ -50,7 +50,7 @@
         <q-item-section avatar>
           <q-avatar :icon="g.icon.startsWith('mdi-') ? g.icon : `img:${g.icon}`" v-if="g.icon" />
         </q-item-section>
-        <q-item-section>{{ g.name }}</q-item-section>
+        <q-item-section class="text-weight-bold">{{ g.name }}</q-item-section>
       </q-item>
 
       <q-separator />
@@ -59,7 +59,7 @@
           <q-avatar :icon="e.icon.startsWith('mdi-') ? e.icon : `img:${e.icon}`" v-if="e.icon" />
         </q-item-section>
         <q-item-section>
-          <q-item-label>{{ e.name }}</q-item-label>
+          <q-item-label class="text-weight-bold">{{ e.name }}</q-item-label>
           <q-item-label caption v-if="e.user_name">{{ e.user_name }}</q-item-label>
         </q-item-section>
       </q-item>
