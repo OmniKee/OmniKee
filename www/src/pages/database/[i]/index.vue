@@ -210,7 +210,7 @@ const listItems = asyncComputed(() => {
 
   const {current, parent} = found
 
-  const groups: Group[] = current.children
+  const groups: Group[] = JSON.parse(JSON.stringify(current.children))
 
   if (parent) {
     groups.unshift({
