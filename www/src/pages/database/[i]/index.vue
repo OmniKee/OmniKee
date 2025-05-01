@@ -24,6 +24,9 @@
 
             <template #body-cell-name="{row}">
               <q-td @dblclick="onDoubleClick(row)">
+                <q-avatar v-if="'otp' in row.fields" icon="mdi-clock-outline">
+                  <q-tooltip>Has TOTP</q-tooltip>
+                </q-avatar>
                 <q-avatar size="lg" v-if="row.icon"
                   :icon="row.icon.startsWith('mdi-') ? row.icon : `img:${row.icon}`" />
                 {{ row.name }}
