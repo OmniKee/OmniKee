@@ -38,6 +38,24 @@
               </q-td>
             </template>
 
+            <template #body-cell-username="{row}">
+              <q-td @dblclick="onUsernameDoubleClick(row)">
+                {{ row.user_name }}
+              </q-td>
+            </template>
+
+            <template #body-cell-password="{row}">
+              <q-td class="" @dblclick="onPasswordDoubleClick(row)">
+                {{ hasField(row, 'Password') ? "&#x25cf;&#x25cf;&#x25cf;" : "" }}
+              </q-td>
+            </template>
+
+            <template #body-cell-url="{row}">
+              <q-td>
+                <a :href="row.url" target="_blank">{{ row.url }}</a>
+              </q-td>
+            </template>
+
           </q-table>
         </q-scroll-area>
       </template>
@@ -76,6 +94,7 @@ import {type QTableColumn, type QTreeNode} from 'quasar'
 
 import {useViewStore} from '@/stores/view'
 
+import ok from '@/omnikee'
 import {type Entry, type Group} from 'omnikee-wasm'
 import {asyncComputed} from '@vueuse/core'
 
@@ -134,6 +153,7 @@ const columns: QTableColumn[] = [
   {name: "icons", label: "", field: "name", align: "left", sortable: false, headerStyle: "width: 50px"},
   {name: "name", label: "Name", field: "name", align: "left", sortable: true},
   {name: "user_name", label: "Username", field: "user_name", align: "left", sortable: true},
+  {name: "password", label: "Password", field: "password", align: "left", sortable: false},
   {name: "url", label: "URL", field: "url", align: "left", sortable: true}
 ]
 
@@ -144,6 +164,19 @@ function onRowClick(_event: Event, entry: Entry) {
 async function onDoubleClick(entry: Entry) {
   viewStore.current.entry = entry.uuid
   await router.push({name: '/database/[i]/entry/[uuid]', params: {i: route.params.i, uuid: entry.uuid}})
+}
+
+async function onUsernameDoubleClick(entry: Entry) {
+  if (!entry.user_name) {return }
+  await navigator.clipboard.writeText(entry.user_name)
+}
+
+async function onPasswordDoubleClick(entry: Entry) {
+  if (typeof viewStore.current.database === 'undefined') {return }
+  const pwd = await ok.revealProtected(viewStore.current.database, entry.uuid, "Password")
+
+  if (typeof pwd === 'undefined') {return }
+  await navigator.clipboard.writeText(pwd)
 }
 
 const listItems = asyncComputed(() => {
@@ -185,8 +218,8 @@ function onListGroupClick(group: Group) {
 }
 
 function hasField(entry: Entry, field: string) {
-  // this is needed to support both WebAssembly (compiles fields into an object) and Tauri (compiles it into a Map)
-  return field in entry.fields || ('has' in entry.fields && entry.fields.has('otp'))
+  // this is needed to support both WebAssembly (compiles fields into a Map) and Tauri (compiles it into an object)
+  return (field in entry.fields) || ('has' in entry.fields && entry.fields.has(field))
 }
 
 </script>
