@@ -20,7 +20,7 @@
         <q-tab-panels style="height: 100%" v-model="tab" animated swipeable vertical transition-prev="jump-up"
           transition-next="jump-up">
 
-          <q-tab-panel name="entry">
+          <q-tab-panel class="full-height column" name="entry">
 
             <FieldInput class="q-mb-sm" filled :entry="entry" field="Title" label="Title">
               <template #prepend><q-icon name="mdi-form-textbox" /></template>
@@ -43,7 +43,10 @@
                   <q-tooltip>Open in Browser</q-tooltip>
                 </q-btn>
               </template>
+            </FieldInput>
 
+            <FieldInput autogrow copy type="textarea" class="q-mb-sm" filled :entry="entry" field="Notes" label="Notes">
+              <template #prepend><q-icon name="mdi-note-text" /></template>
             </FieldInput>
 
           </q-tab-panel>
@@ -109,7 +112,7 @@ async function onOpen(url: string) {
   await ok.openExternalLink(url)
 }
 
-const defaultFields = new Set(['UserName', 'Password', 'Title', 'URL'])
+const defaultFields = new Set(['UserName', 'Password', 'Title', 'URL', 'Notes'])
 
 const selectedField = ref<string | undefined>(undefined)
 
@@ -132,3 +135,4 @@ const fields = computed(() => {
 })
 
 </script>
+
