@@ -51,7 +51,6 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
   console.log("OmniKee will dispatch commands to Tauri backend")
 
   const {invoke} = await import('@tauri-apps/api/core')
-  const {getCurrentWindow} = await import('@tauri-apps/api/window')
   const {openUrl} = await import('@tauri-apps/plugin-opener')
 
   handle = {
@@ -70,6 +69,9 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     },
 
     async setWindowTitle(title) {
+      if (process.env.TAURI_ENV_PLATFORM === 'android' || process.env.TAURI_ENV_PLATFORM === 'ios') {return }
+      const {getCurrentWindow} = await import('@tauri-apps/api/window')
+
       await getCurrentWindow().setTitle(title)
     }
 
