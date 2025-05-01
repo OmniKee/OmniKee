@@ -22,13 +22,18 @@
             :loading="viewStore.loadingGroupEntries" :columns="columns" row-key="uuid" :rows-per-page-options="[0]"
             hide-pagination @row-click="onRowClick">
 
-            <template #body-cell-name="{row}">
+            <template #body-cell-icons="{row}">
               <q-td @dblclick="onDoubleClick(row)">
-                <q-avatar v-if="'otp' in row.fields" icon="mdi-clock-outline">
-                  <q-tooltip>Has TOTP</q-tooltip>
+                <q-avatar size="md" :icon="hasField(row, 'otp') ? 'mdi-clock-outline' : ''">
+                  <q-tooltip v-if="hasField(row, 'otp')">Has TOTP</q-tooltip>
                 </q-avatar>
                 <q-avatar size="lg" v-if="row.icon"
                   :icon="row.icon.startsWith('mdi-') ? row.icon : `img:${row.icon}`" />
+              </q-td>
+            </template>
+
+            <template #body-cell-name="{row}">
+              <q-td @dblclick="onDoubleClick(row)">
                 {{ row.name }}
               </q-td>
             </template>
@@ -123,6 +128,7 @@ const selectedGroup = computed({
 
 
 const columns: QTableColumn[] = [
+  {name: "icons", label: "", field: "name", align: "left", sortable: false, headerStyle: "width: 50px"},
   {name: "name", label: "Name", field: "name", align: "left", sortable: true},
   {name: "user_name", label: "Username", field: "user_name", align: "left", sortable: true},
   {name: "url", label: "URL", field: "url", align: "left", sortable: true}
@@ -192,6 +198,11 @@ const listItems = asyncComputed(() => {
 function onListGroupClick(group: ListItem) {
   console.log(group)
   viewStore.current.group = group.uuid
+}
+
+function hasField(entry: Entry, field: string) {
+  // this is needed to support both WebAssembly (compiles fields into an object) and Tauri (compiles it into a Map)
+  return field in entry.fields || ('has' in entry.fields && entry.fields.has('otp'))
 }
 
 </script>
