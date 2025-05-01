@@ -225,7 +225,7 @@ jobs:
       - name: upload APK to release
         uses: softprops/action-gh-release@v2
         with:
-          tag: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tag_name: ${{ github.ref_name }}
           draft: true
           fail_on_unmatched_files: true
           name: "OmniKee ${{ github.ref_name }}"
