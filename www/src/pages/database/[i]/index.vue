@@ -89,7 +89,9 @@
 
 <script setup lang="ts">
 import {computed, ref, watch} from 'vue'
+
 import {useRoute, useRouter} from 'vue-router'
+
 import {type QTableColumn, type QTreeNode} from 'quasar'
 
 import {useViewStore} from '@/stores/view'
@@ -98,10 +100,20 @@ import ok from '@/omnikee'
 import {type Entry, type Group} from 'omnikee-wasm'
 import {asyncComputed} from '@vueuse/core'
 
+definePage({
+  meta: {
+    title() {
+      const viewStore = useViewStore()
+      return viewStore.database?.name || viewStore.current.database
+    },
+  },
+})
+
 const route = useRoute('/database/[i]/')
 const router = useRouter()
 
 const viewStore = useViewStore()
+
 
 function updateRoute() {
   viewStore.current.database = +route.params.i

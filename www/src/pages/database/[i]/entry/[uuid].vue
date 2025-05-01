@@ -94,6 +94,18 @@ import {useViewStore} from '@/stores/view'
 import ok from '@/omnikee'
 import {type Value} from 'omnikee-wasm'
 
+definePage({
+  meta: {
+    title() {
+      const viewStore = useViewStore()
+      const db = viewStore.database?.name || viewStore.current.database
+      const entry = viewStore.entry?.name || viewStore.current.entry
+
+      return `${entry} | ${db}`
+    },
+  },
+})
+
 const route = useRoute('/database/[i]/entry/[uuid]')
 
 const viewStore = useViewStore()
@@ -135,4 +147,3 @@ const fields = computed(() => {
 })
 
 </script>
-

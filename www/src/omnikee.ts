@@ -12,6 +12,7 @@ export interface OmniKee {
   getOtp(databaseIdx: number, entryUuid: string, time: bigint): Promise<OTPResponse>,
 
   openExternalLink(url: string): Promise<void>,
+  setWindowTitle(title: string): Promise<void>,
 }
 
 let handle: OmniKee
@@ -39,12 +40,18 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
       window.open(url)
       return Promise.resolve()
     },
+
+    setWindowTitle(title) {
+      document.title = title
+      return Promise.resolve()
+    }
   }
 
 } else {
   console.log("OmniKee will dispatch commands to Tauri backend")
 
   const {invoke} = await import('@tauri-apps/api/core')
+  const {getCurrentWindow} = await import('@tauri-apps/api/window')
   const {openUrl} = await import('@tauri-apps/plugin-opener')
 
   handle = {
@@ -60,6 +67,10 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
     async openExternalLink(url) {
       await openUrl(url)
+    },
+
+    async setWindowTitle(title) {
+      await getCurrentWindow().setTitle(title)
     }
 
   }
