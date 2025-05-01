@@ -133,7 +133,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           projectPath: ./tauri
           releaseName: "OmniKee v__VERSION__"
           releaseBody: "See the assets to download this version and install."
@@ -225,7 +225,7 @@ jobs:
       - name: upload APK to release
         uses: softprops/action-gh-release@v2
         with:
-          tag: app-${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tag: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
           draft: true
           fail_on_unmatched_files: true
           name: "OmniKee ${{ github.ref_name }}"
