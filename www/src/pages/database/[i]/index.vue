@@ -58,7 +58,10 @@
         <q-item-section avatar>
           <q-avatar :icon="e.icon.startsWith('mdi-') ? e.icon : `img:${e.icon}`" v-if="e.icon" />
         </q-item-section>
-        <q-item-section>{{ e.name }}</q-item-section>
+        <q-item-section>
+          <q-item-label>{{ e.name }}</q-item-label>
+          <q-item-label caption v-if="e.user_name">{{ e.user_name }}</q-item-label>
+        </q-item-section>
       </q-item>
     </q-list>
 
@@ -138,16 +141,9 @@ function onRowClick(_event: Event, entry: Entry) {
   viewStore.current.entry = entry.uuid
 }
 
-async function onDoubleClick(entry: Entry | ListItem) {
+async function onDoubleClick(entry: Entry) {
   viewStore.current.entry = entry.uuid
   await router.push({name: '/database/[i]/entry/[uuid]', params: {i: route.params.i, uuid: entry.uuid}})
-}
-
-type ListItem = {
-  type: 'group' | 'entry',
-  uuid: string,
-  name: string,
-  icon: string | undefined,
 }
 
 const listItems = asyncComputed(() => {
@@ -169,34 +165,22 @@ const listItems = asyncComputed(() => {
 
   const {current, parent} = found
 
-  const groups: ListItem[] = current.children.map(c => ({
-    type: 'group',
-    uuid: c.uuid,
-    name: c.name,
-    icon: c.icon,
-  } as ListItem))
+  const groups: Group[] = current.children
 
   if (parent) {
     groups.unshift({
-      type: 'group',
       uuid: parent.uuid,
       name: `[ up to ${parent.name} ]`,
       icon: parent.icon,
-    } as ListItem)
+    } as Group)
   }
 
-  const entries: ListItem[] = (viewStore.groupEntries || []).map(e => ({
-    type: 'entry',
-    uuid: e.uuid,
-    name: e.name,
-    icon: e.icon,
-  } as ListItem))
+  const entries: Entry[] = (viewStore.groupEntries || [])
 
   return {groups, entries}
 })
 
-function onListGroupClick(group: ListItem) {
-  console.log(group)
+function onListGroupClick(group: Group) {
   viewStore.current.group = group.uuid
 }
 
