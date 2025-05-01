@@ -1,5 +1,5 @@
 
-import {type DatabaseOverview, type Entry} from 'omnikee-wasm'
+import {type OTPResponse, type DatabaseOverview, type Entry} from 'omnikee-wasm'
 
 
 export interface OmniKee {
@@ -9,6 +9,7 @@ export interface OmniKee {
 
   listEntries(databaseIdx: number, groupUuid: string): Promise<Entry[]>,
   revealProtected(databaseIdx: number, entryUuid: string, fieldName: string): Promise<string | undefined>,
+  getOtp(databaseIdx: number, entryUuid: string, time: bigint): Promise<OTPResponse>,
 
   openExternalLink(url: string): Promise<void>,
 }
@@ -32,6 +33,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
     listEntries(databaseIdx, groupUuid) {return Promise.resolve(state.list_entries(databaseIdx, groupUuid))},
     revealProtected(databaseIdx, entryUuid, fieldName) {return Promise.resolve(state.reveal_protected(databaseIdx, entryUuid, fieldName))},
+    getOtp(databaseIdx, entryUuid, time) {return Promise.resolve(state.get_otp(databaseIdx, entryUuid, time))},
 
     openExternalLink(url) {
       window.open(url)
@@ -54,6 +56,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     async revealProtected(databaseIdx, entryUuid, fieldName) {
       return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
     },
+    async getOtp(databaseIdx, entryUuid, time) {return await invoke("get_otp", {databaseIdx, entryUuid, time})},
 
     async openExternalLink(url) {
       await openUrl(url)

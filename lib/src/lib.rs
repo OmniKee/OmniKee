@@ -1,6 +1,6 @@
 mod icon;
 
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, str::FromStr, time::Duration};
 
 use anyhow::{Context, Result};
 use keepass::{
@@ -91,6 +91,14 @@ pub enum Value {
     Bytes(Vec<u8>),
     Unprotected(String),
     Protected,
+}
+
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct OTPResponse {
+    pub code: String,
+    pub valid_for: Duration,
+    pub period: Duration,
 }
 
 impl Into<DatabaseOverview> for &Database {
@@ -265,5 +273,40 @@ impl AppState {
         } else {
             None
         }
+    }
+
+    pub fn get_otp(
+        &self,
+        database_idx: usize,
+        entry_uuid: &str,
+        time: u64,
+    ) -> Result<OTPResponse, String> {
+        let Ok(entry_uuid) = Uuid::from_str(&entry_uuid) else {
+            return Err("Invalid entry UUID".into());
+        };
+
+        let db = self
+            .databases
+            .get(database_idx)
+            .ok_or("No database with that index".to_string())?;
+
+        // find the appropriate containing group recursively
+        let Some(NodeRef::Entry(entry)) = db.database.root.iter().find(|node| {
+            if let NodeRef::Entry(e) = node {
+                e.uuid == entry_uuid
+            } else {
+                false
+            }
+        }) else {
+            return Err("No otp field".into());
+        };
+
+        let value = entry.get_otp().map_err(|e| e.to_string())?.value_at(time);
+
+        Ok(OTPResponse {
+            code: value.code,
+            valid_for: value.valid_for,
+            period: value.period,
+        })
     }
 }

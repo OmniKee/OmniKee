@@ -307,6 +307,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "base32"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "022dfe9eb35f19ebbcb51e0b40a5ab759f46ad60cadf7297e0bd085afb50e076"
+
+[[package]]
 name = "base64"
 version = "0.21.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2112,6 +2118,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c71b51dc5d04d475d066102e931ceca00960f314f31b48e8da2dd2906e29d3e"
 dependencies = [
  "aes",
+ "base32",
  "base64 0.22.1",
  "block-modes",
  "byteorder",
@@ -2131,7 +2138,9 @@ dependencies = [
  "serde_json",
  "sha2",
  "thiserror 2.0.12",
+ "totp-lite",
  "twofish",
+ "url",
  "uuid",
  "xml-rs",
  "zeroize",
@@ -3684,6 +3693,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha1"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
+]
+
+[[package]]
 name = "sha2"
 version = "0.10.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4462,6 +4482,18 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow 0.7.6",
+]
+
+[[package]]
+name = "totp-lite"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8e43134db17199f7f721803383ac5854edd0d3d523cc34dba321d6acfbe76c3"
+dependencies = [
+ "digest",
+ "hmac",
+ "sha1",
+ "sha2",
 ]
 
 [[package]]

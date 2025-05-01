@@ -22,10 +22,22 @@
 
           <q-tab-panel name="entry">
 
-            <FieldInput class="q-mb-sm" filled :entry="entry" field="Title" label="Title" />
-            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="UserName" label="Username" />
-            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="Password" label="Password" />
+            <FieldInput class="q-mb-sm" filled :entry="entry" field="Title" label="Title">
+              <template #prepend><q-icon name="mdi-form-textbox" /></template>
+            </FieldInput>
+
+            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="UserName" label="Username">
+              <template #prepend><q-icon name="mdi-account" /></template>
+            </FieldInput>
+
+            <FieldInput copy class="q-mb-sm" filled :entry="entry" field="Password" label="Password">
+              <template #prepend><q-icon name="mdi-key" /></template>
+            </FieldInput>
+
+            <TOTPField class="q-mb-sm" filled :entry="entry" />
+
             <FieldInput copy class="q-mb-sm" filled :entry="entry" field="URL" label="URL">
+              <template #prepend><q-icon name="mdi-web" /></template>
               <template #append="{field}">
                 <q-btn flat v-if="field?.value" @click="onOpen(field.value)" icon="mdi-open-in-new" target="_blank">
                   <q-tooltip>Open in Browser</q-tooltip>

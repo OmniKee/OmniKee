@@ -1,5 +1,8 @@
 <template>
   <q-input :class="{protected: field?.type === 'Protected'}" :modelValue="field?.value" :type="type" readonly>
+    <template #prepend>
+      <slot name="prepend" :field="field"></slot>
+    </template>
     <template #append>
 
       <slot name="append" :field="field"></slot>

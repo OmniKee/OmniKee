@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use omnikee_lib::{AppState, DatabaseOverview, Entry};
+use omnikee_lib::{AppState, DatabaseOverview, Entry, OTPResponse};
 use tauri::Manager;
 
 type State<'a> = tauri::State<'a, Mutex<AppState>>;
@@ -45,6 +45,17 @@ fn reveal_protected(
     state.reveal_protected(database_idx, &entry_uuid, &field_name)
 }
 
+#[tauri::command]
+fn get_otp(
+    state: State<'_>,
+    database_idx: usize,
+    entry_uuid: String,
+    time: u64,
+) -> Result<OTPResponse, String> {
+    let state = state.lock().unwrap();
+    state.get_otp(database_idx, &entry_uuid, time)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state: AppState = Default::default();
@@ -57,6 +68,7 @@ pub fn run() {
             close_database,
             list_entries,
             reveal_protected,
+            get_otp,
         ])
         .setup(|app| {
             app.manage(Mutex::new(state));
