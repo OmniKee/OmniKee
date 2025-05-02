@@ -17,7 +17,7 @@
 
 
       <template #after>
-        <q-tab-panels style="height: 100%" v-model="tab" animated swipeable vertical transition-prev="jump-up"
+        <q-tab-panels style="height: 100%" v-model="tab" animated vertical transition-prev="jump-up"
           transition-next="jump-up">
 
           <q-tab-panel class="full-height column" name="entry">
