@@ -1,27 +1,40 @@
-FROM docker.io/library/rust:slim as builder-rust
+# --- Stage 1: Rust build (wasm-pack) ---
+FROM rust:slim AS builder-rust
 
+# Install wasm-pack
 RUN cargo install wasm-pack
 
-WORKDIR /code/lib
+# Set working directory and copy Rust source
+WORKDIR /app/lib
 COPY ./lib .
 
+# Compile to WebAssembly
 ENV RUSTFLAGS='--cfg getrandom_backend="wasm_js"'
-RUN wasm-pack build -t web
+RUN wasm-pack build --target web
 
-FROM docker.io/library/node:lts-slim as builder-node
+# --- Stage 2: Node.js build ---
+FROM node:lts-slim AS builder-node
 
-WORKDIR /code/www
+# Set working directory and copy frontend source
+WORKDIR /app/www
 COPY ./www .
-COPY --from=builder-rust /code/lib/pkg /code/lib/pkg
 
+# Copy compiled wasm package from Rust builder
+COPY --from=builder-rust /app/lib/pkg /app/lib/pkg
+
+# Install dependencies and build frontend
 ENV PUBLIC_PATH=/
-RUN npm install && npm run build
+RUN npm ci && npm run build
 
-FROM docker.io/library/busybox:stable
+# --- Stage 3: Minimal runtime image ---
+FROM busybox:stable
 
+# Use non-root user
 USER www-data
 
-COPY --from=builder-node --chown=www-data:www-data /code/www/dist/spa /var/www/html/
+# Copy built frontend to serving directory
+COPY --from=builder-node --chown=www-data:www-data /app/www/dist/spa /var/www/html/
 
+# Start HTTP server
 ENTRYPOINT ["/bin/httpd"]
 CMD ["-f", "-p", "8080", "-h", "/var/www/html"]
