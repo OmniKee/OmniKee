@@ -10,21 +10,20 @@ tauri = []
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+anyhow = "1.0.98"
+base64 = "0.22.1"
 keepass = { version = "0.7.32", features = ["save_kdbx4", "serialization", "totp"] }
 
+# needed for cross compilation
 serde = { version = "1.0.219", features = ["derive"] }
 wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1.7"
+tsify = { version = "0.5.5", features = ["js"] }
 
 # dependency feature overrides for keepass
+chrono = { version = "0.4.40", features = ["wasmbind"] }
 getrandom = { version = "0.3.2", features = ["wasm_js"] }
 uuid = { version = "1.16.0", features = ["rng-getrandom"] }
-anyhow = "1.0.98"
-serde-wasm-bindgen = "0.6.5"
-console_error_panic_hook = "0.1.7"
-chrono = { version = "0.4.40", features = ["wasmbind"] }
-tsify = { version = "0.5.5", features = ["js"] }
-base64 = "0.22.1"
-
 
 [target.wasm32-unknown-unknown]
 rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
