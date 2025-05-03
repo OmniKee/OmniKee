@@ -1,6 +1,11 @@
 mod icon;
 
-use std::{collections::HashMap, str::FromStr, time::Duration};
+use std::{
+    collections::HashMap,
+    io::{Cursor, Read, Write},
+    str::FromStr,
+    time::Duration,
+};
 
 use anyhow::{Context, Result};
 use keepass::{
@@ -19,14 +24,61 @@ pub struct AppState {
     databases: Vec<Database>,
 }
 
-#[derive(Clone)]
+trait DatabaseSource: Send {
+    fn open(&self) -> Result<Box<dyn Read>>;
+    fn save(&mut self) -> Result<Box<dyn Write + '_>>;
+
+    fn send_saved(&self) -> Option<Vec<u8>>;
+}
+
+struct BufferDatabaseSource(Vec<u8>);
+
+impl DatabaseSource for BufferDatabaseSource {
+    fn open(&self) -> Result<Box<dyn Read>> {
+        Ok(Box::new(Cursor::new(self.0.clone())))
+    }
+
+    fn save(&mut self) -> Result<Box<dyn Write + '_>> {
+        Ok(Box::new(&mut self.0))
+    }
+
+    fn send_saved(&self) -> Option<Vec<u8>> {
+        Some(self.0.clone())
+    }
+}
+
+#[cfg(feature = "tauri")]
+struct FilesystemDatabaseSource {
+    path: String,
+}
+
+#[cfg(feature = "tauri")]
+impl DatabaseSource for FilesystemDatabaseSource {
+    fn open(&self) -> Result<Box<dyn Read>> {
+        use std::fs::File;
+        Ok(Box::new(File::open(&self.path)?))
+    }
+
+    fn save(&mut self) -> Result<Box<dyn Write + '_>> {
+        use std::fs::File;
+        Ok(Box::new(File::create(&self.path)?))
+    }
+
+    fn send_saved(&self) -> Option<Vec<u8>> {
+        None
+    }
+}
+
 struct Database {
     database: keepass::Database,
+    key: DatabaseKey,
+
+    source: Box<dyn DatabaseSource>,
 }
 
 impl Database {
-    fn load(
-        data: &mut dyn std::io::Read,
+    fn load<S: DatabaseSource + 'static>(
+        source: S,
         password: Option<String>,
         keyfile: Option<Vec<u8>>,
     ) -> Result<Self> {
@@ -40,9 +92,24 @@ impl Database {
             key = key.with_keyfile(&mut &kf[..]).context("Reading keyfile")?;
         }
 
-        let database = keepass::Database::open(data, key.clone())?;
+        let mut reader = source.open()?;
 
-        Ok(Self { database })
+        let database = keepass::Database::open(&mut reader, key.clone())?;
+
+        Ok(Self {
+            database,
+            key,
+            source: Box::new(source),
+        })
+    }
+
+    fn save(&mut self) -> Result<Option<Vec<u8>>> {
+        {
+            let mut writer = self.source.save()?;
+            self.database.save(&mut writer, self.key.clone())?;
+        }
+
+        Ok(self.source.send_saved())
     }
 
     fn get_name(&self) -> &str {
@@ -160,18 +227,69 @@ impl AppState {
     }
 
     /// Load a new database from a buffer
-    pub fn load_database(
+    pub fn load_database_buffer(
         &mut self,
-        mut data: &[u8],
+        data: &[u8],
         password: Option<String>,
         keyfile: Option<Vec<u8>>,
     ) -> Result<DatabaseOverview, String> {
-        let db = Database::load(&mut data, password, keyfile).map_err(|e| format!("{}", e))?;
+        let db = Database::load(BufferDatabaseSource(data.to_vec()), password, keyfile)
+            .map_err(|e| format!("{}", e))?;
 
         let res: DatabaseOverview = (&db).into();
         self.databases.push(db);
 
         Ok(res)
+    }
+
+    /// Load a new database from a filesystem path
+    #[cfg(feature = "tauri")]
+    pub fn load_database_path(
+        &mut self,
+        path: &str,
+        password: Option<String>,
+        keyfile: Option<Vec<u8>>,
+    ) -> Result<DatabaseOverview, String> {
+        let db = Database::load(
+            FilesystemDatabaseSource {
+                path: path.to_string(),
+            },
+            password,
+            keyfile,
+        )
+        .map_err(|e| format!("{}", e))?;
+
+        let res: DatabaseOverview = (&db).into();
+        self.databases.push(db);
+
+        Ok(res)
+    }
+
+    /// Save a database to the same path it was loaded from
+    pub fn save_database(&mut self, database_idx: usize) -> Result<Option<Vec<u8>>, String> {
+        let Some(db) = self.databases.get_mut(database_idx) else {
+            return Err("No database by that index".to_string());
+        };
+
+        db.save().map_err(|e| format!("{}", e))
+    }
+
+    /// Save a database to a specified destination
+    #[cfg(feature = "tauri")]
+    pub fn save_database_as(
+        &mut self,
+        database_idx: usize,
+        path: &str,
+    ) -> Result<Option<Vec<u8>>, String> {
+        let Some(db) = self.databases.get_mut(database_idx) else {
+            return Err("No database by that index".to_string());
+        };
+
+        db.source = Box::new(FilesystemDatabaseSource {
+            path: path.to_string(),
+        });
+
+        db.save().map_err(|e| format!("{}", e))
     }
 
     /// Close a database

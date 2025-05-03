@@ -29,7 +29,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
   handle = {
     listDatabases() {return Promise.resolve(state.list_databases())},
-    loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database(data, password, keyfile))},
+    loadDatabase(data, password, keyfile) {return Promise.resolve(state.load_database_buffer(data, password, keyfile))},
     closeDatabase(databaseIdx) {return Promise.resolve(state.close_database(databaseIdx))},
 
     listEntries(databaseIdx, groupUuid) {return Promise.resolve(state.list_entries(databaseIdx, groupUuid))},
@@ -59,7 +59,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
   handle = {
     async listDatabases() {return await invoke('list_databases')},
-    async loadDatabase(data, password, keyfile) {return await invoke('load_database', {data, password, keyfile})},
+    async loadDatabase(data, password, keyfile) {return await invoke('load_database_buffer', {data, password, keyfile})},
     async closeDatabase(databaseIdx) {return await invoke('close_database', {databaseIdx})},
 
     async listEntries(databaseIdx, groupUuid) {return await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})},
