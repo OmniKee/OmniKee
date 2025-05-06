@@ -14,9 +14,9 @@
           <q-tooltip>Save Database (not implemented)</q-tooltip>
         </q-btn>
 
-        <q-btn flat round dense disabled>
+        <q-btn flat round dense @click="onLock" :disabled="!(viewStore.database?.state === 'Unlocked')">
           <q-icon name="mdi-lock" />
-          <q-tooltip>Lock Database (not implemented)</q-tooltip>
+          <q-tooltip>Lock Database</q-tooltip>
         </q-btn>
 
         <q-separator dark vertical spaced inset />
@@ -82,14 +82,21 @@
 import {computed, ref} from 'vue';
 
 import {useDatabasesStore} from '@/stores/databases'
+import {useViewStore} from '@/stores/view';
 
 const databasesStore = useDatabasesStore()
+const viewStore = useViewStore()
 
 const databases = computed(() => {
   return databasesStore.databases
 })
 
 const searchText = ref("")
+
+async function onLock() {
+  if (typeof viewStore.current.database === 'undefined') {return }
+  await databasesStore.lockDatabase(viewStore.current.database)
+}
 
 </script>
 

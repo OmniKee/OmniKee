@@ -8,6 +8,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    DatabaseOverview: typeof import('./src/components/database/DatabaseOverview.vue')['default']
+    DatabaseUnlock: typeof import('./src/components/database/DatabaseUnlock.vue')['default']
     FieldInput: typeof import('./src/components/FieldInput.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

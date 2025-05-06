@@ -1,7 +1,7 @@
 mod icon;
 
 mod database;
-pub mod exchange;
+mod exchange;
 mod source;
 
 use std::str::FromStr;
@@ -15,10 +15,9 @@ use keepass::db::{Node, Value as KpValue};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
-use crate::{
-    database::Database,
-    exchange::{DatabaseOverview, Entry, OTPResponse},
-};
+use crate::database::Database;
+
+pub use crate::exchange::*;
 
 #[wasm_bindgen]
 #[derive(Default)]
@@ -40,6 +39,25 @@ impl AppState {
     /// List databases that are currently loaded in the AppState
     pub fn list_databases(&self) -> Vec<DatabaseOverview> {
         self.databases.iter().map(|db| db.into()).collect()
+    }
+
+    /// Load and unlock a demo database
+    pub fn load_demo(&mut self) -> Result<DatabaseOverview, String> {
+        let data = include_bytes!("demo.kdbx");
+
+        let mut db = Database::load(crate::source::BufferDatabaseSource {
+            name: "demo.kdbx".to_string(),
+            buffer: data.to_vec(),
+        })
+        .map_err(|e| format!("{}", e))?;
+
+        db.unlock(Some("demopass".to_string()), None)
+            .map_err(|e| format!("{}", e))?;
+
+        let res: DatabaseOverview = (&db).into();
+        self.databases.push(db);
+
+        Ok(res)
     }
 
     /// Load a new database from a buffer

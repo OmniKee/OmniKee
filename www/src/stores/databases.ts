@@ -21,10 +21,28 @@ export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */)
     databases.value = res
   }
 
-  async function loadDatabase(data: Uint8Array, password: string | null, keyFile: Uint8Array | null) {
-    const res = await ok.loadDatabase(data, password, keyFile)
+  async function loadDemo() {
+    const res = await ok.loadDemo()
     databases.value.push(res)
+    return res
+  }
 
+  async function loadDatabase() {
+    const res = await ok.loadDatabase()
+    databases.value.push(res)
+    return res
+  }
+
+  async function unlockDatabase(databaseIdx: number, password: string | null, keyfile: Uint8Array | null) {
+    const res = await ok.unlockDatabase(databaseIdx, password, keyfile)
+    databases.value[databaseIdx] = res
+    return res
+
+  }
+
+  async function lockDatabase(databaseIdx: number) {
+    const res = await ok.lockDatabase(databaseIdx)
+    databases.value[databaseIdx] = res
     return res
   }
 
@@ -50,5 +68,9 @@ export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */)
     }
   }
 
-  return {databases, refresh, loadDatabase, closeDatabase}
+  return {
+    databases, refresh,
+
+    loadDemo, loadDatabase, unlockDatabase, lockDatabase, closeDatabase
+  }
 })
