@@ -275,6 +275,7 @@ impl AppState {
         }
     }
 
+    /// Get the current time-based one-time password (TOTP) for an entry
     pub fn get_otp(
         &self,
         database_idx: usize,
