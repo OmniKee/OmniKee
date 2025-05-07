@@ -8,13 +8,13 @@
 
     <q-separator />
 
-    <q-item clickable @click="onSave" :disable="!isOpenDatabaseSelected">
+    <q-item clickable @click="onSave" :disable="!isOpenDatabaseSelected" v-if="appStore.is.tauri">
       <q-item-section avatar><q-avatar icon="mdi-content-save" /></q-item-section>
       <q-item-section>Save</q-item-section>
     </q-item>
 
     <q-item clickable @click="onSaveAs" :disable="!isOpenDatabaseSelected">
-      <q-item-section avatar></q-item-section>
+      <q-item-section avatar><q-avatar icon="mdi-content-save-settings" /></q-item-section>
       <q-item-section>Save as...</q-item-section>
     </q-item>
 
@@ -37,11 +37,13 @@
 import {computed} from 'vue'
 import {useRouter} from 'vue-router'
 
+import {useAppStore} from '@/stores/app'
 import {useDatabasesStore} from '@/stores/databases'
 import {useViewStore} from '@/stores/view'
 
 const router = useRouter()
 
+const appStore = useAppStore()
 const databasesStore = useDatabasesStore()
 const viewStore = useViewStore()
 
