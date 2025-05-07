@@ -16,17 +16,26 @@ use crate::database::{Database, DatabaseState};
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(tag = "state")]
 pub enum DatabaseOverview {
-    Unlocked { name: String, root: Group },
-    Locked { name: String },
+    Unlocked {
+        file_name: String,
+        name: String,
+        root: Group,
+    },
+    Locked {
+        file_name: String,
+        name: String,
+    },
 }
 
 impl Into<DatabaseOverview> for &Database {
     fn into(self) -> DatabaseOverview {
         match &self.state {
             DatabaseState::Locked => DatabaseOverview::Locked {
+                file_name: self.source.get_name().to_string(),
                 name: self.get_name().to_string(),
             },
             DatabaseState::Unlocked { database, .. } => DatabaseOverview::Unlocked {
+                file_name: self.source.get_name().to_string(),
                 name: self.get_name().to_string(),
                 root: (&database.root, database).into(),
             },

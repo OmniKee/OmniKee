@@ -11,6 +11,7 @@ declare module 'vue' {
     DatabaseOverview: typeof import('./src/components/database/DatabaseOverview.vue')['default']
     DatabaseUnlock: typeof import('./src/components/database/DatabaseUnlock.vue')['default']
     FieldInput: typeof import('./src/components/FieldInput.vue')['default']
+    Menu: typeof import('./src/components/Menu.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TOTPField: typeof import('./src/components/TOTPField.vue')['default']

@@ -1,11 +1,16 @@
 
 import {type OTPResponse, type DatabaseOverview, type Entry} from 'omnikee-wasm'
 
+import {saveAs} from 'file-saver'
+
 
 export interface OmniKee {
-  listDatabases(): Promise<DatabaseOverview[]>;
-  loadDemo(): Promise<DatabaseOverview>;
-  loadDatabase(): Promise<DatabaseOverview>;
+  listDatabases(): Promise<DatabaseOverview[]>,
+
+  loadDemo(): Promise<DatabaseOverview>,
+  loadDatabase(): Promise<DatabaseOverview>,
+  saveDatabase(databaseIdx: number): Promise<void>,
+  saveDatabaseAs(databaseIdx: number): Promise<void>,
 
   unlockDatabase(databaseIdx: number, password: string | null, keyfile: Uint8Array | null): Promise<DatabaseOverview>,
   lockDatabase(databaseIdx: number): Promise<DatabaseOverview>,
@@ -33,8 +38,7 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
   const state = ok.AppState.new()
 
 
-  function promptFile(): Promise<File> {
-
+  function promptFileOpen(): Promise<File> {
     return new Promise((resolve, reject) => {
 
       const $input = document.createElement('input')
@@ -56,17 +60,32 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     })
   }
 
-
   handle = {
     listDatabases() {return Promise.resolve(state.list_databases())},
 
     loadDemo() {return Promise.resolve(state.load_demo())},
 
     async loadDatabase() {
-      const file = await promptFile()
+      const file = await promptFileOpen()
       const data = new Uint8Array(await file.arrayBuffer())
 
       return Promise.resolve(state.load_database_buffer(file.name, data))
+    },
+
+    saveDatabase(databaseIdx) {
+      const desc = state.list_databases()[databaseIdx]
+      if (!desc) {return Promise.reject(new Error("No database with that index"))}
+
+      const data = state.save_database(databaseIdx)
+      if (!data) {return Promise.reject(new Error("Did not get data from the backend"))}
+
+      saveAs(new Blob([data], {type: "application/x-keepass"}), desc.file_name)
+
+      return Promise.resolve()
+    },
+
+    async saveDatabaseAs(databaseIdx) {
+      await this.saveDatabase(databaseIdx)
     },
 
     unlockDatabase(databaseIdx, password, keyfile) {return Promise.resolve(state.unlock_database(databaseIdx, password, keyfile))},
@@ -104,10 +123,10 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
 
     async loadDemo() {return await invoke('load_demo')},
 
-    async loadDatabase() {
-      // file picking is done from the Tauri backend
-      return await invoke('load_database')
-    },
+    // file picking is done from the Tauri backend
+    async loadDatabase() {return await invoke('load_database')},
+    async saveDatabase(databaseIdx) {return await invoke('save_database', {databaseIdx})},
+    async saveDatabaseAs(databaseIdx) {return await invoke('save_database_as', {databaseIdx})},
 
     async unlockDatabase(databaseIdx, password, keyfile) {return await invoke('unlock_database', {databaseIdx, password, keyfile})},
     async lockDatabase(databaseIdx) {return await invoke('lock_database', {databaseIdx})},
