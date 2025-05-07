@@ -1,40 +1,22 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header data-tauri-drag-region>
-      <q-toolbar class="titlebar" data-tauri-drag-region>
-        <q-avatar data-tauri-drag-region="">
-          <img src="@/assets/logo.svg" alt="OmniKee logo" />
-        </q-avatar>
-        <q-toolbar-title data-tauri-drag-region shrink>
-          OmniKee
-        </q-toolbar-title>
+      <q-toolbar class="titlebar q-pl-none" data-tauri-drag-region>
 
-        <q-btn flat round dense disabled>
-          <q-icon name="mdi-content-save" />
-          <q-tooltip>Save Database (not implemented)</q-tooltip>
-        </q-btn>
+        <q-btn-dropdown class="row" no-caps auto-close>
+          <template #label>
+            <q-avatar>
+              <img src="@/assets/logo.svg" alt="OmniKee logo" />
+            </q-avatar>
+            <q-toolbar-title data-tauri-drag-region shrink>
+              OmniKee
+            </q-toolbar-title>
 
-        <q-btn flat round dense disabled>
-          <q-icon name="mdi-lock" />
-          <q-tooltip>Lock Database (not implemented)</q-tooltip>
-        </q-btn>
+          </template>
 
-        <q-separator dark vertical spaced inset />
 
-        <q-btn flat round dense disabled>
-          <q-icon name="mdi-plus" />
-          <q-tooltip>Add Entry (not implemented)</q-tooltip>
-        </q-btn>
-
-        <q-btn flat round dense disabled>
-          <q-icon name="mdi-pencil" />
-          <q-tooltip>Edit Entry (not implemented)</q-tooltip>
-        </q-btn>
-
-        <q-btn flat round dense disabled>
-          <q-icon name="mdi-delete" />
-          <q-tooltip>Delete Entry (not implemented)</q-tooltip>
-        </q-btn>
+          <Menu />
+        </q-btn-dropdown>
 
         <q-space />
 
@@ -49,11 +31,18 @@
       </q-toolbar>
 
       <q-tabs align="left" class="bg-secondary">
-        <img class="alternate q-ml-sm" src="@/assets/logo.svg" alt="OmniKee logo" />
 
-        <q-route-tab :to="{name: '/'}">
-          <q-icon name="mdi-folder-open" alt="Open Database" />
-          <q-tooltip>Open&nbsp;Database</q-tooltip>
+        <q-btn-dropdown class="alternate" auto-close>
+          <template #label>
+            <img src="@/assets/logo.svg" alt="OmniKee logo" />
+          </template>
+
+          <Menu />
+        </q-btn-dropdown>
+
+        <q-route-tab class="q-px-sm" :to="{name: '/'}">
+          <q-icon name="mdi-home" alt="Home" />
+          <q-tooltip>Home</q-tooltip>
         </q-route-tab>
 
         <q-route-tab v-for="db, i in databases" :key="i" :to="{name: '/database/[i]/', params: {i}}" no-caps>
@@ -82,7 +71,6 @@
 import {computed, ref} from 'vue';
 
 import {useDatabasesStore} from '@/stores/databases'
-
 const databasesStore = useDatabasesStore()
 
 const databases = computed(() => {
@@ -90,6 +78,7 @@ const databases = computed(() => {
 })
 
 const searchText = ref("")
+
 
 </script>
 
