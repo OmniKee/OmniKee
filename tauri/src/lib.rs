@@ -19,20 +19,42 @@ fn load_demo(state: State<'_>) -> Result<DatabaseOverview, String> {
 }
 
 #[tauri::command]
-fn load_database(app: AppHandle, state: State<'_>) -> Result<DatabaseOverview, String> {
-    let mut state = state.lock().unwrap();
-    let path = app
-        .dialog()
-        .file()
-        .add_filter("KeePass Databases", &["kdbx"])
-        .blocking_pick_file()
-        .and_then(|p| p.into_path().ok());
+async fn load_database(app: AppHandle, state: State<'_>) -> Result<DatabaseOverview, String> {
+    let app = app.clone();
+
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .add_filter("KeePass Databases", &["kdbx"])
+            .blocking_pick_file()
+            .and_then(|p| p.into_path().ok())
+    })
+    .await
+    .map_err(|e| e.to_string())?;
 
     if let Some(path) = path {
+        let mut state = state.lock().unwrap();
         return state.load_database_path(&path);
     }
 
     Err("Loading aborted".into())
+}
+
+#[tauri::command]
+fn unlock_database(
+    state: State<'_>,
+    database_idx: usize,
+    password: Option<String>,
+    keyfile: Option<Vec<u8>>,
+) -> Result<DatabaseOverview, String> {
+    let mut state = state.lock().unwrap();
+    state.unlock_database(database_idx, password, keyfile)
+}
+
+#[tauri::command]
+fn lock_database(state: State<'_>, database_idx: usize) -> Result<DatabaseOverview, String> {
+    let mut state = state.lock().unwrap();
+    state.lock_database(database_idx)
 }
 
 #[tauri::command]
@@ -42,21 +64,30 @@ fn save_database(state: State<'_>, database_idx: usize) -> Result<Option<Vec<u8>
 }
 
 #[tauri::command]
-fn save_database_as(app: AppHandle, state: State<'_>, database_idx: usize) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
+async fn save_database_as(
+    app: AppHandle,
+    state: State<'_>,
+    database_idx: usize,
+) -> Result<(), String> {
+    let app = app.clone();
 
-    let path = app
-        .dialog()
-        .file()
-        .add_filter("KeePass Databases", &["kdbx"])
-        .blocking_save_file()
-        .and_then(|p| p.into_path().ok());
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .add_filter("KeePass Databases", &["kdbx"])
+            .blocking_save_file()
+            .and_then(|p| p.into_path().ok())
+    })
+    .await
+    .map_err(|e| e.to_string())?;
 
     if let Some(path) = path {
+        let mut state = state.lock().unwrap();
         state.save_database_as(database_idx, &path)?;
+        return Ok(());
     }
 
-    Ok(())
+    Err("Loading aborted".into())
 }
 
 #[tauri::command]
@@ -103,10 +134,13 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             list_databases,
             load_demo,
             load_database,
+            unlock_database,
+            lock_database,
             save_database,
             save_database_as,
             close_database,
