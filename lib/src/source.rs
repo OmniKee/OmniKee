@@ -32,6 +32,7 @@ impl DatabaseSource for BufferDatabaseSource {
     }
 
     fn save(&mut self) -> Result<Box<dyn Write + '_>> {
+        self.buffer.clear();
         Ok(Box::new(&mut self.buffer))
     }
 

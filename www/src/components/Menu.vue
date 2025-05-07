@@ -10,12 +10,12 @@
 
     <q-item clickable @click="onSave" :disable="!isOpenDatabaseSelected" v-if="appStore.is.tauri">
       <q-item-section avatar><q-avatar icon="mdi-content-save" /></q-item-section>
-      <q-item-section>Save</q-item-section>
+      <q-item-section>Save (EXPERIMENTAL)</q-item-section>
     </q-item>
 
     <q-item clickable @click="onSaveAs" :disable="!isOpenDatabaseSelected">
       <q-item-section avatar><q-avatar icon="mdi-content-save-settings" /></q-item-section>
-      <q-item-section>Save as...</q-item-section>
+      <q-item-section>Save as... (EXPERIMENTAL)</q-item-section>
     </q-item>
 
     <q-separator />

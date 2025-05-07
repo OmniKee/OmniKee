@@ -69,12 +69,10 @@ export const useDatabasesStore = defineStore('databases', (/* { ssrContext } */)
   }
 
   async function saveDatabase(databaseIdx: number) {
-    if (!confirm('WARNING - Database saving is currently experimental - make sure to backup your database!\nDo you want to proceed?')) {return }
     await ok.saveDatabase(databaseIdx)
   }
 
   async function saveDatabaseAs(databaseIdx: number) {
-    if (!confirm('WARNING - Database saving is currently experimental - make sure to backup your database!\nDo you want to proceed?')) {return }
     await ok.saveDatabaseAs(databaseIdx)
   }
 
