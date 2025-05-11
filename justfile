@@ -21,6 +21,11 @@ build-www: build-lib
 build-tauri $NO_STRIP='true': build-lib
     cargo tauri build
 
+# build the Android app
+[working-directory('tauri')]
+build-android: build-lib
+    cargo tauri android build
+
 # develop the web app with live reloading
 [working-directory('www')]
 dev-www: build-lib
@@ -31,3 +36,8 @@ dev-www: build-lib
 [working-directory('tauri')]
 dev-tauri: build-lib
     cargo tauri dev
+
+# develop on Android
+[working-directory('tauri')]
+dev-android: build-lib
+    cargo tauri android dev
