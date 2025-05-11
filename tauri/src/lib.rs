@@ -1,7 +1,8 @@
 use std::sync::Mutex;
 
 use omnikee_lib::{AppState, DatabaseOverview, Entry, OTPResponse};
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
+use tauri_plugin_dialog::DialogExt;
 
 type State<'a> = tauri::State<'a, Mutex<AppState>>;
 
@@ -12,14 +13,81 @@ fn list_databases(state: State<'_>) -> Vec<DatabaseOverview> {
 }
 
 #[tauri::command]
-fn load_database(
+fn load_demo(state: State<'_>) -> Result<DatabaseOverview, String> {
+    let mut state = state.lock().unwrap();
+    state.load_demo()
+}
+
+#[tauri::command]
+async fn load_database(app: AppHandle, state: State<'_>) -> Result<DatabaseOverview, String> {
+    let app = app.clone();
+
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .add_filter("KeePass Databases", &["kdbx"])
+            .blocking_pick_file()
+            .and_then(|p| p.into_path().ok())
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+
+    if let Some(path) = path {
+        let mut state = state.lock().unwrap();
+        return state.load_database_path(&path);
+    }
+
+    Err("Loading aborted".into())
+}
+
+#[tauri::command]
+fn unlock_database(
     state: State<'_>,
-    data: Vec<u8>,
+    database_idx: usize,
     password: Option<String>,
     keyfile: Option<Vec<u8>>,
 ) -> Result<DatabaseOverview, String> {
     let mut state = state.lock().unwrap();
-    state.load_database(&data[..], password, keyfile)
+    state.unlock_database(database_idx, password, keyfile)
+}
+
+#[tauri::command]
+fn lock_database(state: State<'_>, database_idx: usize) -> Result<DatabaseOverview, String> {
+    let mut state = state.lock().unwrap();
+    state.lock_database(database_idx)
+}
+
+#[tauri::command]
+fn save_database(state: State<'_>, database_idx: usize) -> Result<Option<Vec<u8>>, String> {
+    let mut state = state.lock().unwrap();
+    state.save_database(database_idx)
+}
+
+#[tauri::command]
+async fn save_database_as(
+    app: AppHandle,
+    state: State<'_>,
+    database_idx: usize,
+) -> Result<(), String> {
+    let app = app.clone();
+
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .add_filter("KeePass Databases", &["kdbx"])
+            .blocking_save_file()
+            .and_then(|p| p.into_path().ok())
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+
+    if let Some(path) = path {
+        let mut state = state.lock().unwrap();
+        state.save_database_as(database_idx, &path)?;
+        return Ok(());
+    }
+
+    Err("Loading aborted".into())
 }
 
 #[tauri::command]
@@ -29,7 +97,11 @@ fn close_database(state: State<'_>, database_idx: usize) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn list_entries(state: State<'_>, database_idx: usize, group_uuid: String) -> Vec<Entry> {
+fn list_entries(
+    state: State<'_>,
+    database_idx: usize,
+    group_uuid: String,
+) -> Result<Vec<Entry>, String> {
     let state = state.lock().unwrap();
     state.list_entries(database_idx, group_uuid)
 }
@@ -40,7 +112,7 @@ fn reveal_protected(
     database_idx: usize,
     entry_uuid: String,
     field_name: String,
-) -> Option<String> {
+) -> Result<String, String> {
     let state = state.lock().unwrap();
     state.reveal_protected(database_idx, &entry_uuid, &field_name)
 }
@@ -62,9 +134,15 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             list_databases,
+            load_demo,
             load_database,
+            unlock_database,
+            lock_database,
+            save_database,
+            save_database_as,
             close_database,
             list_entries,
             reveal_protected,
