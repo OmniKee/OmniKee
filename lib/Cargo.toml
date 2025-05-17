@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-tauri = []
+tauri = ["dep:tauri", "dep:tauri-plugin-fs"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,6 +13,10 @@ crate-type = ["cdylib", "rlib"]
 anyhow = "1.0.98"
 base64 = "0.22.1"
 keepass = { version = "0.8.3", features = ["save_kdbx4", "serialization", "totp"] }
+
+# tauri-specific, for better OS integration
+tauri-plugin-fs = { version = "2.2.1", optional = true }
+tauri = { version = "2.5.1", optional = true }
 
 # needed for cross compilation
 serde = { version = "1.0.219", features = ["derive"] }

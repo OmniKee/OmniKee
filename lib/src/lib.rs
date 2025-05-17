@@ -42,6 +42,7 @@ impl AppState {
     }
 
     /// Load and unlock a demo database
+    #[cfg(not(feature = "tauri"))]
     pub fn load_demo(&mut self) -> Result<DatabaseOverview, String> {
         let data = include_bytes!("demo.kdbx");
 
@@ -52,6 +53,26 @@ impl AppState {
         .map_err(|e| format!("{}", e))?;
 
         db.unlock(Some("demopass".to_string()), None)
+            .map_err(|e| format!("{}", e))?;
+
+        let res: DatabaseOverview = (&db).into();
+        self.databases.push(db);
+
+        Ok(res)
+    }
+
+    /// Load and unlock a demo database
+    #[cfg(feature = "tauri")]
+    pub fn load_demo(&mut self, app: tauri::AppHandle) -> Result<DatabaseOverview, String> {
+        let data = include_bytes!("demo.kdbx");
+
+        let mut db = Database::load(crate::source::BufferDatabaseSource {
+            name: "demo.kdbx".to_string(),
+            buffer: data.to_vec(),
+        })
+        .map_err(|e| format!("{}", e))?;
+
+        db.unlock(Some("demopass".to_string()), None, app)
             .map_err(|e| format!("{}", e))?;
 
         let res: DatabaseOverview = (&db).into();
@@ -82,7 +103,7 @@ impl AppState {
     #[cfg(feature = "tauri")]
     pub fn load_database_path(&mut self, path: &Path) -> Result<DatabaseOverview, String> {
         let db = Database::load(crate::source::FilesystemDatabaseSource {
-            path: path.to_owned(),
+            path: tauri_plugin_fs::FilePath::Path(path.to_path_buf()),
         })
         .map_err(|e| format!("{}", e))?;
 
@@ -93,6 +114,7 @@ impl AppState {
     }
 
     /// Unlock a loaded database
+    #[cfg(not(feature = "tauri"))]
     pub fn unlock_database(
         &mut self,
         database_idx: usize,
@@ -108,6 +130,25 @@ impl AppState {
         Ok((&*db).into())
     }
 
+    /// Unlock a loaded database
+    #[cfg(feature = "tauri")]
+    pub fn unlock_database(
+        &mut self,
+        database_idx: usize,
+        password: Option<String>,
+        keyfile: Option<Vec<u8>>,
+        app: tauri::AppHandle,
+    ) -> Result<DatabaseOverview, String> {
+        let Some(db) = self.databases.get_mut(database_idx) else {
+            return Err("No database by that index".to_string());
+        };
+
+        db.unlock(password, keyfile, app)
+            .map_err(|e| format!("{}", e))?;
+
+        Ok((&*db).into())
+    }
+
     /// Lock a loaded database
     pub fn lock_database(&mut self, database_idx: usize) -> Result<DatabaseOverview, String> {
         let Some(db) = self.databases.get_mut(database_idx) else {
@@ -119,6 +160,7 @@ impl AppState {
     }
 
     /// Save a database to the same path it was loaded from
+    #[cfg(not(feature = "tauri"))]
     pub fn save_database(&mut self, database_idx: usize) -> Result<Option<Vec<u8>>, String> {
         let Some(db) = self.databases.get_mut(database_idx) else {
             return Err("No database by that index".to_string());
@@ -127,22 +169,35 @@ impl AppState {
         db.save().map_err(|e| format!("{}", e))
     }
 
-    /// Save a database to a specified destination
+    /// Save a database to the same path it was loaded from
     #[cfg(feature = "tauri")]
-    pub fn save_database_as(
+    pub fn save_database(
         &mut self,
         database_idx: usize,
-        path: &Path,
+        app: tauri::AppHandle,
     ) -> Result<Option<Vec<u8>>, String> {
         let Some(db) = self.databases.get_mut(database_idx) else {
             return Err("No database by that index".to_string());
         };
 
-        db.source = Box::new(crate::source::FilesystemDatabaseSource {
-            path: path.to_owned(),
-        });
+        db.save(app).map_err(|e| format!("{}", e))
+    }
 
-        db.save().map_err(|e| format!("{}", e))
+    /// Save a database to a specified destination
+    #[cfg(feature = "tauri")]
+    pub fn save_database_as(
+        &mut self,
+        database_idx: usize,
+        path: tauri_plugin_fs::FilePath,
+        app: tauri::AppHandle,
+    ) -> Result<Option<Vec<u8>>, String> {
+        let Some(db) = self.databases.get_mut(database_idx) else {
+            return Err("No database by that index".to_string());
+        };
+
+        db.source = Box::new(crate::source::FilesystemDatabaseSource { path });
+
+        db.save(app).map_err(|e| format!("{}", e))
     }
 
     /// Close a database

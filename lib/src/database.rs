@@ -38,6 +38,8 @@ impl Database {
         &mut self,
         password: Option<String>,
         keyfile: Option<Vec<u8>>,
+
+        #[cfg(feature = "tauri")] app: tauri::AppHandle,
     ) -> Result<()> {
         let mut key = KpDatabaseKey::new();
 
@@ -49,7 +51,10 @@ impl Database {
             key = key.with_keyfile(&mut &kf[..]).context("Reading keyfile")?;
         }
 
-        let mut reader = self.source.open()?;
+        let mut reader = self.source.open(
+            #[cfg(feature = "tauri")]
+            app,
+        )?;
 
         let database = KpDatabase::open(&mut reader, key.clone())?;
 
@@ -64,10 +69,17 @@ impl Database {
     }
 
     /// Save the database contents to its source
-    pub(crate) fn save(&mut self) -> Result<Option<Vec<u8>>> {
+    pub(crate) fn save(
+        &mut self,
+        #[cfg(feature = "tauri")] app: tauri::AppHandle,
+    ) -> Result<Option<Vec<u8>>> {
         if let DatabaseState::Unlocked { database, key } = &self.state {
             {
-                let mut writer = self.source.save()?;
+                let mut writer = self.source.save(
+                    #[cfg(feature = "tauri")]
+                    app,
+                )?;
+
                 database.save(&mut writer, key.clone())?;
             }
             Ok(self.source.send_saved())

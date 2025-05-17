@@ -13,9 +13,9 @@ fn list_databases(state: State<'_>) -> Vec<DatabaseOverview> {
 }
 
 #[tauri::command]
-fn load_demo(state: State<'_>) -> Result<DatabaseOverview, String> {
+fn load_demo(app: AppHandle, state: State<'_>) -> Result<DatabaseOverview, String> {
     let mut state = state.lock().unwrap();
-    state.load_demo()
+    state.load_demo(app)
 }
 
 #[tauri::command]
@@ -42,13 +42,14 @@ async fn load_database(app: AppHandle, state: State<'_>) -> Result<DatabaseOverv
 
 #[tauri::command]
 fn unlock_database(
+    app: AppHandle,
     state: State<'_>,
     database_idx: usize,
     password: Option<String>,
     keyfile: Option<Vec<u8>>,
 ) -> Result<DatabaseOverview, String> {
     let mut state = state.lock().unwrap();
-    state.unlock_database(database_idx, password, keyfile)
+    state.unlock_database(database_idx, password, keyfile, app)
 }
 
 #[tauri::command]
@@ -58,9 +59,13 @@ fn lock_database(state: State<'_>, database_idx: usize) -> Result<DatabaseOvervi
 }
 
 #[tauri::command]
-fn save_database(state: State<'_>, database_idx: usize) -> Result<Option<Vec<u8>>, String> {
+fn save_database(
+    app: AppHandle,
+    state: State<'_>,
+    database_idx: usize,
+) -> Result<Option<Vec<u8>>, String> {
     let mut state = state.lock().unwrap();
-    state.save_database(database_idx)
+    state.save_database(database_idx, app)
 }
 
 #[tauri::command]
@@ -69,21 +74,22 @@ async fn save_database_as(
     state: State<'_>,
     database_idx: usize,
 ) -> Result<(), String> {
-    let app = app.clone();
+    let app_thread = app.clone();
 
     let path = tauri::async_runtime::spawn_blocking(move || {
-        app.dialog()
+        app_thread
+            .dialog()
             .file()
             .add_filter("KeePass Databases", &["kdbx"])
             .blocking_save_file()
-            .and_then(|p| p.into_path().ok())
     })
     .await
     .map_err(|e| e.to_string())?;
 
     if let Some(path) = path {
         let mut state = state.lock().unwrap();
-        state.save_database_as(database_idx, &path)?;
+        state.save_database_as(database_idx, path, app)?;
+
         return Ok(());
     }
 
@@ -133,6 +139,7 @@ pub fn run() {
     let state: AppState = Default::default();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
