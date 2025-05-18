@@ -225,7 +225,7 @@ impl AppState {
             .ok_or("Cannot get database by that index".to_string())?;
 
         let group = database
-            .find_group(&group_uuid)
+            .group(&group_uuid)
             .map_err(|e| format!("{}", e))?
             .ok_or("Group not found by UUID".to_string())?;
 
@@ -280,7 +280,7 @@ impl AppState {
             .ok_or("Cannot get database by that index".to_string())?;
 
         let entry = database
-            .find_entry(&entry_uuid)
+            .entry(&entry_uuid)
             .map_err(|e| format!("{}", e))?
             .ok_or("No entry by that UUID".to_string())?;
 
@@ -294,6 +294,55 @@ impl AppState {
         } else {
             Err("The field is not protected".to_string())
         }
+    }
+
+    /// Set the name of a group
+    pub fn set_group_name(
+        &mut self,
+        database_idx: usize,
+        group_uuid: &str,
+        name: String,
+    ) -> Result<(), String> {
+        let group_uuid = Uuid::from_str(&group_uuid).map_err(|e| format!("{}", e))?;
+
+        let database = self
+            .databases
+            .get_mut(database_idx)
+            .ok_or("Cannot get database by that index".to_string())?;
+
+        let group = database
+            .group_mut(&group_uuid)
+            .map_err(|e| format!("{}", e))?
+            .ok_or("No entry by that UUID".to_string())?;
+
+        group.name = name;
+
+        Ok(())
+    }
+
+    /// Set the value of a field within an entry
+    pub fn set_field(
+        &mut self,
+        database_idx: usize,
+        entry_uuid: &str,
+        field_name: String,
+        value: ValueSet,
+    ) -> Result<(), String> {
+        let entry_uuid = Uuid::from_str(&entry_uuid).map_err(|e| format!("{}", e))?;
+
+        let database = self
+            .databases
+            .get_mut(database_idx)
+            .ok_or("Cannot get database by that index".to_string())?;
+
+        let entry = database
+            .entry_mut(&entry_uuid)
+            .map_err(|e| format!("{}", e))?
+            .ok_or("No entry by that UUID".to_string())?;
+
+        entry.fields.insert(field_name, value.into());
+
+        Ok(())
     }
 
     /// Get the current time-based one-time password (TOTP) for an entry
@@ -311,7 +360,7 @@ impl AppState {
             .ok_or("Cannot get database by that index".to_string())?;
 
         let entry = database
-            .find_entry(&entry_uuid)
+            .entry(&entry_uuid)
             .map_err(|e| format!("{}", e))?
             .ok_or("No entry by that UUID".to_string())?;
 
