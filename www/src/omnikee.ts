@@ -1,5 +1,5 @@
 
-import {type OTPResponse, type DatabaseOverview, type Entry} from 'omnikee-wasm'
+import {type OTPResponse, type DatabaseOverview, type Entry, type ValueSet} from 'omnikee-wasm'
 
 import {saveAs} from 'file-saver'
 
@@ -20,6 +20,9 @@ export interface OmniKee {
   listEntries(databaseIdx: number, groupUuid: string): Promise<Entry[]>,
   revealProtected(databaseIdx: number, entryUuid: string, fieldName: string): Promise<string | undefined>,
   getOtp(databaseIdx: number, entryUuid: string, time: bigint): Promise<OTPResponse>,
+
+  setGroupName(databaseIdx: number, groupUuid: string, name: string): Promise<void>,
+  setField(databaseIdx: number, entryUuid: string, fieldName: string, value: ValueSet): Promise<void>,
 
   openExternalLink(url: string): Promise<void>,
   setWindowTitle(title: string): Promise<void>,
@@ -97,6 +100,9 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     revealProtected(databaseIdx, entryUuid, fieldName) {return Promise.resolve(state.reveal_protected(databaseIdx, entryUuid, fieldName))},
     getOtp(databaseIdx, entryUuid, time) {return Promise.resolve(state.get_otp(databaseIdx, entryUuid, time))},
 
+    setGroupName(databaseIdx, groupUuid, name) {return Promise.resolve(state.set_group_name(databaseIdx, groupUuid, name))},
+    setField(databaseIdx, entryUuid, fieldName, value) {return Promise.resolve(state.set_field(databaseIdx, entryUuid, fieldName, value))},
+
     openExternalLink(url) {
       window.open(url)
       return Promise.resolve()
@@ -137,6 +143,9 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
       return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
     },
     async getOtp(databaseIdx, entryUuid, time) {return await invoke("get_otp", {databaseIdx, entryUuid, time: Number(time)})},
+
+    async setGroupName(databaseIdx, groupUuid, name) {return await invoke("set_group_name", {databaseIdx, groupUuid, name})},
+    async setField(databaseIdx, entryUuid, fieldName, value) {return await invoke("set_field", {databaseIdx, entryUuid, fieldName, value})},
 
     async openExternalLink(url) {
       const {openUrl} = await import('@tauri-apps/plugin-opener')

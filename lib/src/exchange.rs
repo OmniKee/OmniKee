@@ -108,6 +108,25 @@ impl Into<Value> for &KpValue {
 
 #[derive(Serialize, Deserialize, Tsify)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(tag = "type")]
+pub enum ValueSet {
+    Bytes { data: Vec<u8> },
+    Unprotected { data: String },
+    Protected { data: String },
+}
+
+impl Into<KpValue> for ValueSet {
+    fn into(self) -> KpValue {
+        match self {
+            ValueSet::Bytes { data } => KpValue::Bytes(data),
+            ValueSet::Unprotected { data } => KpValue::Unprotected(data),
+            ValueSet::Protected { data } => KpValue::Protected(data.into()),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct OTPResponse {
     pub code: String,
     pub valid_for: Duration,

@@ -1,7 +1,9 @@
 use anyhow::{Context, Result, bail};
 
 use keepass::DatabaseKey as KpDatabaseKey;
-use keepass::db::{Database as KpDatabase, Entry as KpEntry, Group as KpGroup, NodeRef};
+use keepass::db::{
+    Database as KpDatabase, Entry as KpEntry, Group as KpGroup, Node as KpNode, NodeRef,
+};
 use uuid::Uuid;
 
 use crate::source::DatabaseSource;
@@ -101,9 +103,18 @@ impl Database {
         }
     }
 
-    /// Convenience method to get inside of an unlocked database
+    /// Convenience method to get a reference to an unlocked database
     pub(crate) fn get_database(&self) -> Result<&KpDatabase> {
         if let DatabaseState::Unlocked { database, .. } = &self.state {
+            Ok(database)
+        } else {
+            bail!("Cannot access - database is locked")
+        }
+    }
+
+    /// Convenience method to get a mutable reference to an unlocked database
+    pub(crate) fn get_database_mut(&mut self) -> Result<&mut KpDatabase> {
+        if let DatabaseState::Unlocked { database, .. } = &mut self.state {
             Ok(database)
         } else {
             bail!("Cannot access - database is locked")
@@ -123,7 +134,7 @@ impl Database {
     }
 
     /// Find a group by its UUID
-    pub(crate) fn find_group(&self, uuid: &Uuid) -> Result<Option<&KpGroup>> {
+    pub(crate) fn group(&self, uuid: &Uuid) -> Result<Option<&KpGroup>> {
         let database = self.get_database()?;
 
         for node in database.root.iter() {
@@ -137,8 +148,31 @@ impl Database {
         Ok(None)
     }
 
-    /// Find an entry by its UUID
-    pub(crate) fn find_entry(&self, uuid: &Uuid) -> Result<Option<&KpEntry>> {
+    /// Get a mutable reference to an entry by its UUID
+    pub(crate) fn group_mut(&mut self, uuid: &Uuid) -> Result<Option<&mut KpGroup>> {
+        let database = self.get_database_mut()?;
+
+        fn inner<'a>(group: &'a mut KpGroup, uuid: &Uuid) -> Option<&'a mut KpGroup> {
+            for node in group.children.iter_mut() {
+                if let KpNode::Group(group) = node {
+                    if &group.uuid == uuid {
+                        return Some(group);
+                    }
+
+                    if let Some(group) = inner(group, uuid) {
+                        return Some(group);
+                    }
+                }
+            }
+
+            None
+        }
+
+        Ok(inner(&mut database.root, uuid))
+    }
+
+    /// Get a reference to an entry by its UUID
+    pub(crate) fn entry(&self, uuid: &Uuid) -> Result<Option<&KpEntry>> {
         let database = self.get_database()?;
 
         for node in database.root.iter() {
@@ -150,5 +184,31 @@ impl Database {
         }
 
         Ok(None)
+    }
+
+    /// Get a mutable reference to an entry by its UUID
+    pub(crate) fn entry_mut(&mut self, uuid: &Uuid) -> Result<Option<&mut KpEntry>> {
+        let database = self.get_database_mut()?;
+
+        fn inner<'a>(group: &'a mut KpGroup, uuid: &Uuid) -> Option<&'a mut KpEntry> {
+            for node in group.children.iter_mut() {
+                match node {
+                    KpNode::Group(group) => {
+                        if let Some(entry) = inner(group, uuid) {
+                            return Some(entry);
+                        }
+                    }
+                    KpNode::Entry(entry) => {
+                        if &entry.uuid == uuid {
+                            return Some(entry);
+                        }
+                    }
+                }
+            }
+
+            None
+        }
+
+        Ok(inner(&mut database.root, uuid))
     }
 }

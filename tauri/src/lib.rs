@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use omnikee_lib::{AppState, DatabaseOverview, Entry, OTPResponse};
+use omnikee_lib::{AppState, DatabaseOverview, Entry, OTPResponse, ValueSet};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_dialog::DialogExt;
 
@@ -134,6 +134,29 @@ fn get_otp(
     state.get_otp(database_idx, &entry_uuid, time)
 }
 
+#[tauri::command]
+fn set_group_name(
+    state: State<'_>,
+    database_idx: usize,
+    group_uuid: String,
+    name: String,
+) -> Result<(), String> {
+    let mut state = state.lock().unwrap();
+    state.set_group_name(database_idx, &group_uuid, name)
+}
+
+#[tauri::command]
+fn set_field(
+    state: State<'_>,
+    database_idx: usize,
+    entry_uuid: String,
+    field_name: String,
+    value: ValueSet,
+) -> Result<(), String> {
+    let mut state = state.lock().unwrap();
+    state.set_field(database_idx, &entry_uuid, field_name, value)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state: AppState = Default::default();
@@ -153,6 +176,8 @@ pub fn run() {
             close_database,
             list_entries,
             reveal_protected,
+            set_group_name,
+            set_field,
             get_otp,
         ])
         .setup(|app| {
