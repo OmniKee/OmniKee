@@ -72,6 +72,7 @@ async function onLock() {
 }
 
 async function onClose() {
-
+  if (typeof viewStore.current.database === 'undefined') {return }
+  await databasesStore.closeDatabase(viewStore.current.database)
 }
 </script>
