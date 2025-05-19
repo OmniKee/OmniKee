@@ -28,6 +28,3 @@ tsify = { version = "0.5.5", features = ["js"] }
 chrono = { version = "0.4.40", features = ["wasmbind"] }
 getrandom = { version = "0.3.2", features = ["wasm_js"] }
 uuid = { version = "1.16.0", features = ["rng-getrandom"] }
-
-[target.wasm32-unknown-unknown]
-rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
