@@ -110,17 +110,17 @@ impl Into<Value> for &KpValue {
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(tag = "type")]
 pub enum ValueSet {
-    Bytes(Vec<u8>),
-    Unprotected(String),
-    Protected(String),
+    Bytes { data: Vec<u8> },
+    Unprotected { data: String },
+    Protected { data: String },
 }
 
 impl Into<KpValue> for ValueSet {
     fn into(self) -> KpValue {
         match self {
-            ValueSet::Bytes(buffer) => KpValue::Bytes(buffer),
-            ValueSet::Unprotected(value) => KpValue::Unprotected(value),
-            ValueSet::Protected(value) => KpValue::Protected(value.into()),
+            ValueSet::Bytes { data } => KpValue::Bytes(data),
+            ValueSet::Unprotected { data } => KpValue::Unprotected(data),
+            ValueSet::Protected { data } => KpValue::Protected(data.into()),
         }
     }
 }
