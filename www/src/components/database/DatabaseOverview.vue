@@ -24,8 +24,8 @@
 
             <template #body-cell-icons="{row}">
               <q-td @dblclick="onDoubleClick(row)">
-                <q-avatar size="md" :icon="hasField(row, 'otp') ? 'mdi-clock-outline' : ''">
-                  <q-tooltip v-if="hasField(row, 'otp')">Has TOTP</q-tooltip>
+                <q-avatar size="md" :icon="row.fields.has('otp') ? 'mdi-clock-outline' : ''">
+                  <q-tooltip v-if="row.fields.has('otp')">Has TOTP</q-tooltip>
                 </q-avatar>
                 <q-avatar size="lg" v-if="row.icon"
                   :icon="row.icon.startsWith('mdi-') ? row.icon : `img:${row.icon}`" />
@@ -46,7 +46,7 @@
 
             <template #body-cell-password="{row}">
               <q-td class="" @dblclick="onPasswordDoubleClick(row)">
-                {{ hasField(row, 'Password') ? "&#x25cf;&#x25cf;&#x25cf;" : "" }}
+                {{ row.fields.has('Password') ? "&#x25cf;&#x25cf;&#x25cf;" : "" }}
               </q-td>
             </template>
 
@@ -212,11 +212,6 @@ const listItems = asyncComputed(() => {
 
 function onListGroupClick(group: Group) {
   viewStore.current.group = group.uuid
-}
-
-function hasField(entry: Entry, field: string) {
-  // this is needed to support both WebAssembly (compiles fields into a Map) and Tauri (compiles it into an object)
-  return (field in entry.fields) || ('has' in entry.fields && entry.fields.has(field))
 }
 
 </script>

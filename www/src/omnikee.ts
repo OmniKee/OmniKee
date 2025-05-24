@@ -138,7 +138,13 @@ if (process.env.TAURI_ENV_PLATFORM === 'web') {
     async lockDatabase(databaseIdx) {return await invoke('lock_database', {databaseIdx})},
     async closeDatabase(databaseIdx) {return await invoke('close_database', {databaseIdx})},
 
-    async listEntries(databaseIdx, groupUuid) {return await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})},
+    async listEntries(databaseIdx, groupUuid) {
+      return (await invoke<Entry[]>('list_entries', {databaseIdx, groupUuid})).map(entry => {
+        // process fields to ensure they are Map, not Record
+        entry.fields = new Map(Object.entries(entry.fields))
+        return entry
+      })
+    },
     async revealProtected(databaseIdx, entryUuid, fieldName) {
       return await invoke<string | undefined>("reveal_protected", {databaseIdx, entryUuid, fieldName})
     },

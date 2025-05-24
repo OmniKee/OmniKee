@@ -131,7 +131,7 @@ const selectedField = ref<string | undefined>(undefined)
 const fields = computed(() => {
   if (!entry.value) {return []}
 
-  const entries: [string, Value][] = ('entries' in entry.value.fields ? [...entry.value.fields.entries()] : Object.entries(entry.value.fields))
+  const entries: [string, Value][] = [...entry.value.fields.entries()]
   return entries.map(([field, fieldValue]) => {
     if (fieldValue === 'Protected') {
       return {field, type: 'Protected', icon: 'mdi-lock'}

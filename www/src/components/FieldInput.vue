@@ -23,7 +23,7 @@
 import {computed, ref} from 'vue'
 import {asyncComputed} from '@vueuse/core'
 
-import {type ValueSet, type Entry, type Value} from 'omnikee-wasm'
+import {type ValueSet, type Entry} from 'omnikee-wasm'
 import ok from '@/omnikee'
 
 import {useViewStore} from '@/stores/view';
@@ -47,7 +47,7 @@ const field = asyncComputed<Field | undefined>(async () => {
   if (viewStore.counter) { /* force reactivity */}
   if (typeof viewStore.current.database === 'undefined') {return undefined}
 
-  const fieldValue = 'get' in props.entry.fields ? props.entry.fields.get(props.field) : props.entry.fields[props.field]
+  const fieldValue = props.entry.fields.get(props.field)
   const revealValue = reveal.value
 
   if (typeof fieldValue === 'undefined') {
@@ -91,11 +91,7 @@ const value = computed({
       .then(() => {
         if (field.value && field.value.type === "Unprotected") {
           // update cached unprotected values in entry
-          if ('set' in props.entry.fields) {
-            props.entry.fields.set(props.field, {"Unprotected": data})
-          } else if (typeof props.entry.fields === "object") {
-            (props.entry.fields as Record<string, Value>)[props.field] = {"Unprotected": data}
-          }
+          props.entry.fields.set(props.field, {"Unprotected": data})
         }
 
         viewStore.counter++
