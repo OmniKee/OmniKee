@@ -30,14 +30,11 @@ async fn load_database(app: AppHandle, state: State<'_>) -> Result<DatabaseOverv
             .and_then(|p| p.into_path().ok())
     })
     .await
-    .map_err(|e| e.to_string())?;
+    .map_err(|e| e.to_string())?
+    .ok_or("Loading aborted".to_string())?;
 
-    if let Some(path) = path {
-        let mut state = state.lock().unwrap();
-        return state.load_database_path(&path);
-    }
-
-    Err("Loading aborted".into())
+    let mut state = state.lock().unwrap();
+    state.load_database_path(&path)
 }
 
 #[tauri::command]
